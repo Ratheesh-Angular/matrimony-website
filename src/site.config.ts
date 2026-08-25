@@ -58,6 +58,13 @@ export const siteConfig = {
     address: "1/130, முருகன் கோவில் தெரு, புதுநல்லூர், சென்னை – 600069",
     hours: "Mon–Sat: 9:00 AM – 7:00 PM",
   },
+
+  socialLinks: {
+    facebook: "https://fb.me/g/4NOYtEvOz/jPqo3wUa?ref=share",
+    youtube: "https://youtube.com/channel/UC5neLXNdS-p6uUf4v2IcDrA?si=FPeNgwYP0xsr_7_b",
+    instagram: "",
+    x: "",
+  },
 };
 
 export type SiteConfig = typeof siteConfig;

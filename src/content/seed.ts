@@ -11,9 +11,10 @@ export const seedSettings = {
   mapZoom: siteConfig.map.zoom,
   mapEmbedUrl: siteConfig.map.embedUrl || "",
   socialLinks: {
-    facebook: "",
-    instagram: "",
-    youtube: "",
+    facebook: siteConfig.socialLinks.facebook,
+    instagram: siteConfig.socialLinks.instagram,
+    youtube: siteConfig.socialLinks.youtube,
+    x: siteConfig.socialLinks.x,
   },
   summary:
     "Trusted matrimony for Mudaliar and Saiva Vellalar families — quick match decisions, district networks, and 10+ years of experience.",

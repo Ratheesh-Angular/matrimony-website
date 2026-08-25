@@ -14,7 +14,7 @@ type Settings = {
   mapZoom: number;
   mapEmbedUrl: string;
   summary: string;
-  socialLinks: { facebook: string; instagram: string; youtube: string };
+  socialLinks: { facebook: string; instagram: string; youtube: string; x: string };
 };
 
 const empty: Settings = {
@@ -28,7 +28,7 @@ const empty: Settings = {
   mapZoom: 15,
   mapEmbedUrl: "",
   summary: "",
-  socialLinks: { facebook: "", instagram: "", youtube: "" },
+  socialLinks: { facebook: "", instagram: "", youtube: "", x: "" },
 };
 
 export default function AdminSettingsPage() {
@@ -155,10 +155,10 @@ export default function AdminSettingsPage() {
             onChange={(e) => setForm({ ...form, mapEmbedUrl: e.target.value })}
           />
         </label>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {(["facebook", "instagram", "youtube"] as const).map((key) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(["facebook", "instagram", "youtube", "x"] as const).map((key) => (
             <label key={key} className="block text-sm">
-              <span className="mb-1 block font-medium capitalize">{key}</span>
+              <span className="mb-1 block font-medium capitalize">{key === "x" ? "X" : key}</span>
               <input
                 className="w-full rounded-md border border-slate-200 px-3 py-2"
                 value={form.socialLinks[key]}

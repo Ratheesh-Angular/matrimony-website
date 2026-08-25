@@ -1,65 +1,45 @@
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
-
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
-
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
-
-function safeFileName(name: string) {
-  const base = path.basename(name).replace(/[^a-zA-Z0-9._-]/g, "_");
-  return base.slice(0, 100) || "photo";
-}
-
-function extensionFor(mime: string, originalName: string) {
-  const fromName = path.extname(originalName).toLowerCase();
-  if (fromName && [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(fromName)) {
-    return fromName === ".jpeg" ? ".jpg" : fromName;
-  }
-  switch (mime) {
-    case "image/jpeg":
-      return ".jpg";
-    case "image/png":
-      return ".png";
-    case "image/webp":
-      return ".webp";
-    case "image/gif":
-      return ".gif";
-    default:
-      return ".bin";
-  }
-}
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  storePublicImage,
+  uniqueUploadFileName,
+} from "@/lib/upload";
 
 export async function POST(request: Request) {
-  const formData = await request.formData();
-  const file = formData.get("file");
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
 
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "file required" }, { status: 400 });
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "file required" }, { status: 400 });
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { error: "Only JPEG, PNG, WebP, or GIF images are allowed" },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      return NextResponse.json({ error: "File must be 5MB or smaller" }, { status: 400 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileName = uniqueUploadFileName(file.name, file.type, "photo");
+    const url = await storePublicImage({
+      buffer,
+      fileName,
+      contentType: file.type,
+      folder: "profiles",
+    });
+
+    return NextResponse.json({ url });
+  } catch (err) {
+    console.error(err);
+    const message =
+      err instanceof Error ? err.message : "Unable to upload photo.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json(
-      { error: "Only JPEG, PNG, WebP, or GIF images are allowed" },
-      { status: 400 },
-    );
-  }
-
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "File must be 5MB or smaller" }, { status: 400 });
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = extensionFor(file.type, file.name);
-  const fileName = `${Date.now()}-${safeFileName(path.parse(file.name).name)}${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads", "profiles");
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, fileName), buffer);
-
-  return NextResponse.json({ url: `/uploads/profiles/${fileName}` });
 }

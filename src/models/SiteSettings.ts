@@ -5,6 +5,7 @@ const SocialLinksSchema = new Schema(
     facebook: { type: String, default: "" },
     instagram: { type: String, default: "" },
     youtube: { type: String, default: "" },
+    x: { type: String, default: "" },
   },
   { _id: false },
 );

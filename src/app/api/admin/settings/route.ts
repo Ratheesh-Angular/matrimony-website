@@ -36,6 +36,7 @@ export async function PUT(request: Request) {
         facebook: body.socialLinks?.facebook ?? "",
         instagram: body.socialLinks?.instagram ?? "",
         youtube: body.socialLinks?.youtube ?? "",
+        x: body.socialLinks?.x ?? "",
       },
     },
     { upsert: true, new: true, setDefaultsOnInsert: true },

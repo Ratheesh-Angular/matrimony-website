@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { SpecialServicesSection } from "@/components/SpecialServicesSection";
 import { buildWhatsappUrl, resolveWhatsappNumber, getSiteSettings } from "@/lib/site-data";
 import { siteConfig } from "@/site.config";
 
@@ -91,6 +92,8 @@ export default async function AboutPage() {
           </p>
         </div>
       </section>
+
+      <SpecialServicesSection />
 
       {/* How we work + Experience */}
       <section className="relative mx-auto grid max-w-5xl gap-12 px-4 py-14 sm:px-6 sm:py-16 md:grid-cols-2 md:gap-16">

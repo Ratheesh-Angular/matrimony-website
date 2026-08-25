@@ -1,4 +1,5 @@
 import { HeroBanner } from "@/components/HeroBanner";
+import { SpecialServicesSection } from "@/components/SpecialServicesSection";
 import { MarriageBiodataForm } from "@/components/biodata/MarriageBiodataForm";
 
 // Admin/DB banner temporarily unused — custom HTML hero is live instead.
@@ -79,6 +80,8 @@ export default async function HomePage() {
           <MarriageBiodataForm />
         </div>
       </section>
+
+      <SpecialServicesSection />
     </>
   );
 }
