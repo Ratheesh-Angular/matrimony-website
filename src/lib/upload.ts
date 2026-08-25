@@ -42,6 +42,21 @@ export function uniqueUploadFileName(originalName: string, mime: string, fallbac
   return `${Date.now()}-${safeUploadFileName(path.parse(originalName).name, fallback)}${ext}`;
 }
 
+/** Supports default OIDC vars and prefixed vars from Vercel store connections. */
+export function getBlobStoreId() {
+  return (
+    process.env.BLOB_STORE_ID ||
+    process.env.BLOB_READ_WRITE_TOKEN_STORE_ID ||
+    undefined
+  );
+}
+
+function canUploadToVercelBlob() {
+  const storeId = getBlobStoreId();
+  if (storeId && process.env.VERCEL_OIDC_TOKEN) return true;
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
 export async function storePublicImage(options: {
   buffer: Buffer;
   fileName: string;
@@ -49,20 +64,23 @@ export async function storePublicImage(options: {
   folder: UploadFolder;
 }): Promise<string> {
   const { buffer, fileName, contentType, folder } = options;
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const pathname = `${folder}/${fileName}`;
 
-  if (token) {
-    const blob = await put(`${folder}/${fileName}`, buffer, {
+  if (canUploadToVercelBlob()) {
+    const storeId = getBlobStoreId();
+    const blob = await put(pathname, buffer, {
       access: "public",
       contentType,
-      token,
+      ...(storeId && process.env.VERCEL_OIDC_TOKEN
+        ? { storeId }
+        : { token: process.env.BLOB_READ_WRITE_TOKEN }),
     });
     return blob.url;
   }
 
   if (process.env.VERCEL) {
     throw new Error(
-      "BLOB_READ_WRITE_TOKEN is not set. Create a Vercel Blob store and add the token to this project's environment variables.",
+      "Vercel Blob is not configured. Connect a public Blob store to this project (OIDC) or set BLOB_READ_WRITE_TOKEN, then redeploy.",
     );
   }
 
