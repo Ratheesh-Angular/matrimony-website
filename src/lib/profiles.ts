@@ -1,4 +1,8 @@
+import { connectDB } from "@/lib/db";
 import type { MarriageProfileDoc } from "@/models/MarriageProfile";
+import { MarriageProfile } from "@/models/MarriageProfile";
+
+export type ProfileStatus = "new" | "approved" | "rejected";
 
 export type ProfilePublic = {
   _id: string;
@@ -36,12 +40,19 @@ export type ProfilePublic = {
     rasi: string[][];
     amsam: string[][];
   };
-  status: string;
+  status: ProfileStatus;
   createdAt?: string;
 };
 
 function str(v: unknown) {
   return v == null ? "" : String(v);
+}
+
+/** Map legacy reviewed/archived values to the new status vocabulary. */
+export function normalizeProfileStatus(status: string): ProfileStatus {
+  if (status === "approved" || status === "reviewed") return "approved";
+  if (status === "rejected" || status === "archived") return "rejected";
+  return "new";
 }
 
 export function serializeProfile(doc: MarriageProfileDoc): ProfilePublic {
@@ -87,7 +98,7 @@ export function serializeProfile(doc: MarriageProfileDoc): ProfilePublic {
         ? h.amsam.map((house) => (Array.isArray(house) ? house.map(String) : []))
         : Array.from({ length: 12 }, () => []),
     },
-    status: str(doc.status) || "new",
+    status: normalizeProfileStatus(str(doc.status) || "new"),
     createdAt:
       doc.createdAt instanceof Date
         ? doc.createdAt.toISOString()
@@ -107,4 +118,17 @@ export function formatAddress(a: ProfilePublic["address"]): string {
     a.pincode ? `Pincode- ${a.pincode}` : "",
   ].filter(Boolean);
   return parts.join(", ");
+}
+
+export async function getApprovedProfiles(limit = 12): Promise<ProfilePublic[]> {
+  await connectDB();
+  const docs = await MarriageProfile.find({
+    status: { $in: ["approved", "reviewed"] },
+  })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+  return docs.map((d) =>
+    serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
+  );
 }

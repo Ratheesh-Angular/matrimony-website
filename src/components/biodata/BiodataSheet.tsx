@@ -38,6 +38,7 @@ export function BiodataSheet({ profile }: { profile: ProfilePublic }) {
 
   return (
     <article
+      id="biodata-sheet-print"
       className="biodata-sheet font-tamil mx-auto max-w-4xl overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10"
       style={
         {

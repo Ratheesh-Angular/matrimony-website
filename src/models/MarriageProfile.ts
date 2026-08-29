@@ -60,7 +60,7 @@ const MarriageProfileSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["new", "reviewed", "archived"],
+      enum: ["new", "approved", "rejected", "reviewed", "archived"],
       default: "new",
     },
   },

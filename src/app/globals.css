@@ -35,6 +35,11 @@ body {
   background: var(--biodata-cream, #fffef8);
 }
 
+#biodata-sheet-print {
+  width: 794px;
+  max-width: 100%;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { ProfileDetailsList } from "@/components/profile/ProfileDetailsList";
 import { connectDB } from "@/lib/db";
 import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
 import { serializeProfile } from "@/lib/profiles";
@@ -73,56 +74,7 @@ export default async function ProfileDetailsPage() {
             </Link>
           </div>
         ) : (
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {profiles.map((p) => (
-              <li key={p._id}>
-                <Link
-                  href={`/profile-details/${p._id}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-[var(--biodata-blue)]/15 transition hover:-translate-y-0.5 hover:shadow-lg hover:ring-[var(--biodata-red)]/40"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4]">
-                    {p.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.photoUrl}
-                        alt={p.name}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[var(--biodata-blue)]/25">
-                        {p.name.charAt(0) || "?"}
-                      </div>
-                    )}
-                    <span
-                      className={`absolute left-3 top-3 rounded-md px-2 py-0.5 text-xs font-bold text-white ${
-                        p.gender === "female" ? "bg-rose-500" : "bg-[var(--biodata-blue)]"
-                      }`}
-                    >
-                      {p.gender === "female" ? "பெண்" : "ஆண்"}
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col gap-1 p-4">
-                    <p className="font-tamil text-lg font-bold text-[var(--biodata-red)] group-hover:underline">
-                      {p.name}
-                    </p>
-                    <p className="text-xs font-semibold text-[var(--biodata-blue)]">
-                      {p.registrationNumber} · {p.registrationDate}
-                    </p>
-                    {(p.nakshatram || p.rasi) && (
-                      <p className="text-sm text-[var(--foreground)]/80">
-                        {[p.nakshatram, p.rasi].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                    {p.occupation ? (
-                      <p className="mt-auto line-clamp-2 pt-2 text-sm text-[var(--muted)]">
-                        {p.occupation}
-                      </p>
-                    ) : null}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <ProfileDetailsList profiles={profiles} />
         )}
       </div>
     </div>

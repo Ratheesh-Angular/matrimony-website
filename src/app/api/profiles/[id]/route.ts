@@ -35,3 +35,70 @@ export async function GET(_request: Request, { params }: Props) {
     );
   }
 }
+
+export async function PATCH(request: Request, { params }: Props) {
+  if (!(await isProfileGateAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const status = body.status;
+    if (!["approved", "rejected"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+
+    await connectDB();
+    const doc = await MarriageProfile.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true },
+    ).lean();
+
+    if (!doc) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      serializeProfile(doc as unknown as Parameters<typeof serializeProfile>[0]),
+    );
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Unable to update profile." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(_request: Request, { params }: Props) {
+  if (!(await isProfileGateAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await connectDB();
+    const doc = await MarriageProfile.findByIdAndDelete(id);
+    if (!doc) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Unable to delete profile." },
+      { status: 500 },
+    );
+  }
+}

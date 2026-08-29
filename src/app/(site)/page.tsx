@@ -1,4 +1,5 @@
 import { HeroBanner } from "@/components/HeroBanner";
+import { ApprovedProfilesSection } from "@/components/profile/ApprovedProfilesSection";
 import { SpecialServicesSection } from "@/components/SpecialServicesSection";
 import { MarriageBiodataForm } from "@/components/biodata/MarriageBiodataForm";
 
@@ -80,6 +81,8 @@ export default async function HomePage() {
           <MarriageBiodataForm />
         </div>
       </section>
+
+      <ApprovedProfilesSection />
 
       <SpecialServicesSection />
     </>

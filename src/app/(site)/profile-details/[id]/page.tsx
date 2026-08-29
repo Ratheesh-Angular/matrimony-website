@@ -2,7 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import mongoose from "mongoose";
+import { BiodataPdfDownload } from "@/components/biodata/BiodataPdfDownload";
 import { BiodataSheet } from "@/components/biodata/BiodataSheet";
+import { ProfileDetailToolbar } from "@/components/profile/ProfileDetailToolbar";
+import { ProfileStatusBadge } from "@/components/profile/ProfileStatusBadge";
 import { connectDB } from "@/lib/db";
 import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
 import { serializeProfile } from "@/lib/profiles";
@@ -53,19 +56,37 @@ export default async function ProfileDetailsDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-[60vh] bg-[linear-gradient(165deg,#f8f1e4_0%,#fffef8_45%,#e8f0fa_100%)] py-10 sm:py-14">
-      <div className="mx-auto mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 sm:px-6">
-        <Link
-          href="/profile-details"
-          className="font-tamil text-sm font-semibold text-[#0056b3] hover:underline"
-        >
-          ← அனைத்து பதிவுகள்
-        </Link>
-        <Link
-          href="/"
-          className="text-sm font-semibold text-[#d93025] hover:underline"
-        >
-          New registration
-        </Link>
+      <div className="mx-auto mb-6 max-w-4xl space-y-4 px-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/profile-details"
+            className="font-tamil text-sm font-semibold text-[#0056b3] hover:underline"
+          >
+            ← அனைத்து பதிவுகள்
+          </Link>
+          <Link
+            href="/"
+            className="text-sm font-semibold text-[#d93025] hover:underline"
+          >
+            New registration
+          </Link>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white/90 p-4 shadow-sm ring-1 ring-[#0056b3]/15">
+          <div className="flex flex-wrap items-center gap-3">
+            <ProfileStatusBadge status={profile.status} />
+            <span className="text-sm font-semibold text-[#0056b3]">
+              {profile.registrationNumber}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <BiodataPdfDownload
+              registrationNumber={profile.registrationNumber}
+              name={profile.name}
+            />
+            <ProfileDetailToolbar profileId={profile._id} status={profile.status} />
+          </div>
+        </div>
       </div>
       <div className="px-3 sm:px-6">
         <BiodataSheet profile={profile} />
