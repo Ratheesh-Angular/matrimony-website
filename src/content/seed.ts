@@ -70,7 +70,7 @@ ${siteConfig.contact.address}
   {
     slug: "contact",
     title: "Contact us",
-    body: `Have a question or need a quote? Use the form below or reach us directly by phone, email, or WhatsApp. We typically reply within one business day.`,
+    body: `Have a question or need help with a biodata or match enquiry? Reach us directly by phone, email, or WhatsApp. We typically reply within one business day.`,
     seoTitle: `Contact | ${siteConfig.businessName}`,
     seoDescription: `Get in touch with ${siteConfig.businessName}.`,
     published: true,

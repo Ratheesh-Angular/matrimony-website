@@ -11,7 +11,7 @@ export async function ApprovedProfilesSection() {
   }
 
   const whatsappHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
-    "Hi! I am interested in an approved profile on your website.",
+    "வணக்கம் சேக்கிழார் மாணாமலை! உங்கள் இணையதளத்தில் உள்ள அங்கீகரிக்கப்பட்ட வரனில் நான் ஆர்வம் கொண்டுள்ளேன். மேலும் விவரங்கள் தெரிந்துகொள்ள உதவுங்கள்.",
   )}`;
 
   return (
@@ -99,7 +99,7 @@ export async function ApprovedProfilesSection() {
           </ul>
         )}
 
-        {profiles.length > 0 ? (
+        {/* {profiles.length > 0 ? (
           <p className="mt-8 text-center text-sm text-slate-500">
             For full biodata access,{" "}
             <Link href="/profile-details/login" className="font-semibold text-[#0056b3] hover:underline">
@@ -107,7 +107,7 @@ export async function ApprovedProfilesSection() {
             </Link>
             .
           </p>
-        ) : null}
+        ) : null} */}
       </div>
     </section>
   );

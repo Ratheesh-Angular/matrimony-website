@@ -25,9 +25,9 @@ export function HeroBanner() {
         <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl animate-rise">
           {siteConfig.businessName}
         </h1>
-        <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/90 sm:text-base animate-rise-delay">
-          Matrimony
-        </p>
+        {/* <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/90 sm:text-base animate-rise-delay">
+          திருமண சேவை
+        </p> */}
         <p className="font-tamil mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg animate-rise-delay">
           {siteConfig.tamilTagline}
         </p>

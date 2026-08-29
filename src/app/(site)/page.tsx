@@ -60,6 +60,8 @@ export default async function HomePage() {
     <>
       <HeroBanner />
 
+      <ApprovedProfilesSection />
+
       {/* User Form — Tamil matrimony biodata */}
       <section className="relative overflow-hidden border-y border-black/5 bg-[linear-gradient(165deg,#f8f1e4_0%,#fffef8_40%,#e8f0fa_100%)]">
         <div
@@ -81,8 +83,6 @@ export default async function HomePage() {
           <MarriageBiodataForm />
         </div>
       </section>
-
-      <ApprovedProfilesSection />
 
       <SpecialServicesSection />
     </>

@@ -38,10 +38,10 @@ export const siteConfig = {
     enquiryForm: true,
   },
 
-  /** E.164 without + for wa.me links, e.g. 919876543210 */
-  whatsappNumber: "919876543210",
+  /** E.164 without + for wa.me links, e.g. 919962204271 */
+  whatsappNumber: "919962204271",
   whatsappDefaultMessage:
-    "Hi! I found your website and would like to know more.",
+    "வணக்கம் சேக்கிழார் மாணாமலை! உங்கள் இணையதளத்தில் உள்ள அங்கீகரிக்கப்பட்ட வரனில் நான் ஆர்வம் கொண்டுள்ளேன். மேலும் விவரங்கள் தெரிந்துகொள்ள உதவுங்கள்.",
 
   /** Used when SiteSettings map fields are empty */
   map: {
