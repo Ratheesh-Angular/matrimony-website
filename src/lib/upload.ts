@@ -1,6 +1,5 @@
-import { mkdir, writeFile } from "fs/promises";
 import path from "path";
-import { put } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -42,19 +41,16 @@ export function uniqueUploadFileName(originalName: string, mime: string, fallbac
   return `${Date.now()}-${safeUploadFileName(path.parse(originalName).name, fallback)}${ext}`;
 }
 
-/** Supports default OIDC vars and prefixed vars from Vercel store connections. */
-export function getBlobStoreId() {
-  return (
-    process.env.BLOB_STORE_ID ||
-    process.env.BLOB_READ_WRITE_TOKEN_STORE_ID ||
-    undefined
-  );
-}
-
-function canUploadToVercelBlob() {
-  const storeId = getBlobStoreId();
-  if (storeId && process.env.VERCEL_OIDC_TOKEN) return true;
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+function getCloudinaryConfig() {
+  const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+  const api_key = process.env.CLOUDINARY_API_KEY;
+  const api_secret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloud_name || !api_key || !api_secret) {
+    throw new Error(
+      "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+    );
+  }
+  return { cloud_name, api_key, api_secret };
 }
 
 export async function storePublicImage(options: {
@@ -63,29 +59,27 @@ export async function storePublicImage(options: {
   contentType: string;
   folder: UploadFolder;
 }): Promise<string> {
-  const { buffer, fileName, contentType, folder } = options;
-  const pathname = `${folder}/${fileName}`;
+  const { buffer, fileName, folder } = options;
+  cloudinary.config(getCloudinaryConfig());
 
-  if (canUploadToVercelBlob()) {
-    const storeId = getBlobStoreId();
-    const blob = await put(pathname, buffer, {
-      access: "public",
-      contentType,
-      ...(storeId && process.env.VERCEL_OIDC_TOKEN
-        ? { storeId }
-        : { token: process.env.BLOB_READ_WRITE_TOKEN }),
-    });
-    return blob.url;
-  }
+  const publicId = path.parse(fileName).name;
 
-  if (process.env.VERCEL) {
-    throw new Error(
-      "Vercel Blob is not configured. Connect a public Blob store to this project (OIDC) or set BLOB_READ_WRITE_TOKEN, then redeploy.",
+  return new Promise((resolve, reject) => {
+    const upload = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: publicId,
+        resource_type: "image",
+        overwrite: false,
+      },
+      (error, result) => {
+        if (error || !result?.secure_url) {
+          reject(error ?? new Error("Cloudinary upload did not return a URL."));
+          return;
+        }
+        resolve(result.secure_url);
+      },
     );
-  }
-
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, fileName), buffer);
-  return `/uploads/${folder}/${fileName}`;
+    upload.end(buffer);
+  });
 }
