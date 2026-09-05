@@ -5,12 +5,12 @@ import {
   formatRegistrationNumber,
   normalizeChart,
 } from "@/lib/biodata";
-import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { serializeProfile } from "@/lib/profiles";
 import { MarriageProfile } from "@/models/MarriageProfile";
 
 export async function GET() {
-  if (!(await isProfileGateAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

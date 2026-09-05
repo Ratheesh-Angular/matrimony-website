@@ -83,8 +83,8 @@ export default async function AboutPage() {
           <p className="font-tamil text-sm font-semibold uppercase tracking-wide text-white/60">
             சேவை
           </p>
-          <p className="font-tamil mt-3 max-w-3xl text-xl font-medium leading-relaxed sm:text-2xl">
-            திருமண வரன்கள் விரைவில் முடிவு செய்து தரப்படும்.
+          <p className="font-tamil mt-3 max-w-3xl whitespace-pre-line text-xl font-medium leading-relaxed sm:text-2xl">
+            {siteConfig.tamilTagline}
           </p>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
             We help families find suitable matches quickly, with clear communication

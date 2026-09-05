@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  checkAdminPassword,
+  checkAdminCredentials,
   createSessionToken,
   getAdminCookieOptions,
   getClearAdminCookieOptions,
@@ -9,9 +9,10 @@ import {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const username = String(body.username || "").trim();
     const password = String(body.password || "");
-    if (!checkAdminPassword(password)) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    if (!checkAdminCredentials(username, password)) {
+      return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
     const token = createSessionToken();
     const res = NextResponse.json({ ok: true });

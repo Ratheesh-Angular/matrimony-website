@@ -12,6 +12,7 @@ const RESERVED = new Set([
   "about",
   "contact",
   "location",
+  "gallery",
   "admin",
   "api",
   "userdata",

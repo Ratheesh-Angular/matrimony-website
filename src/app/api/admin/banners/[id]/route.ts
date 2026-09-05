@@ -32,7 +32,7 @@ export async function PUT(request: Request, { params }: Ctx) {
       order: Number(body.order) || 0,
       active: Boolean(body.active),
     },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!banner) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

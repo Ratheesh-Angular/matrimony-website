@@ -4,40 +4,45 @@ import { siteConfig } from "@/site.config";
 
 const CTA_HREF = "#biodata-form";
 const CTA_LABEL = "வரன் பதிவு";
-const HERO_IMAGE = "/brand/wedding-image.jpg";
 
 export function HeroBanner() {
   return (
-    <section className="relative min-h-[70vh] overflow-hidden bg-[#1a3a5c] text-white">
-      <div className="absolute inset-0">
-        <Image
-          src={HERO_IMAGE}
-          alt=""
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/15" />
-      </div>
+    <section className="relative min-h-[60vh] overflow-hidden text-white md:min-h-[70vh]">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 20% 50%, rgba(155, 27, 46, 0.22) 0%, transparent 55%), radial-gradient(ellipse 50% 50% at 85% 20%, rgba(212, 160, 50, 0.12) 0%, transparent 50%), linear-gradient(155deg, var(--primary) 0%, var(--primary-dark) 55%, #0c1a2e 100%)",
+        }}
+      />
 
-      <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-end px-4 pb-14 pt-28 sm:px-6 sm:pb-16">
-        <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl animate-rise">
-          {siteConfig.businessName}
-        </h1>
-        {/* <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/90 sm:text-base animate-rise-delay">
-          திருமண சேவை
-        </p> */}
-        <p className="font-tamil mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg animate-rise-delay">
-          {siteConfig.tamilTagline}
-        </p>
-        <div className="mt-8 animate-rise-delay-2">
-          <Link
-            href={CTA_HREF}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9b1b2e] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
-          >
-            {CTA_LABEL}
-          </Link>
+      <div className="relative z-10 mx-auto flex min-h-[60vh] max-w-6xl flex-col items-center justify-center gap-5 px-4 py-12 text-center sm:gap-8 sm:px-6 sm:py-16 md:min-h-[70vh] md:flex-row md:gap-12 md:py-20 md:text-left lg:gap-16">
+        <div className="relative h-[240px] w-[240px] shrink-0 animate-fade-up sm:h-[280px] sm:w-[280px] md:h-[380px] md:w-[380px] lg:h-[440px] lg:w-[440px]">
+          <Image
+            src={siteConfig.logoPath}
+            alt={siteConfig.businessName}
+            fill
+            priority
+            className="object-contain drop-shadow-[0_12px_28px_rgba(0,0,0,0.35)]"
+            sizes="(max-width: 768px) 280px, 440px"
+          />
+        </div>
+
+        <div className="flex max-w-xl flex-col items-center md:items-start">
+          <h1 className="font-tamil text-3xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl animate-rise">
+            {siteConfig.businessName}
+          </h1>
+          <p className="font-tamil mt-3 whitespace-pre-line text-base leading-relaxed text-white/85 sm:mt-4 sm:text-lg animate-rise-delay">
+            {siteConfig.tamilTagline}
+          </p>
+          <div className="mt-6 sm:mt-8 animate-rise-delay-2">
+            <Link
+              href={CTA_HREF}
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9b1b2e] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
+            >
+              {CTA_LABEL}
+            </Link>
+          </div>
         </div>
       </div>
     </section>

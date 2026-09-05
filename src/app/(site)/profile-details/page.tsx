@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ProfileDetailsList } from "@/components/profile/ProfileDetailsList";
 import { connectDB } from "@/lib/db";
-import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { serializeProfile } from "@/lib/profiles";
 import { MarriageProfile } from "@/models/MarriageProfile";
 
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfileDetailsPage() {
-  if (!(await isProfileGateAuthenticated())) {
-    redirect("/profile-details/login");
+  if (!(await isAdminAuthenticated())) {
+    redirect("/admin/login");
   }
 
   let profiles: ReturnType<typeof serializeProfile>[] = [];

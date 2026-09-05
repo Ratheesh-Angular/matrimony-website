@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { connectDB } from "@/lib/db";
 import { SiteSettings } from "@/models/SiteSettings";
 import { Banner } from "@/models/Banner";
@@ -5,29 +6,41 @@ import { Page } from "@/models/Page";
 import { seedSettings, seedBanners, seedPages } from "@/content/seed";
 import { siteConfig } from "@/site.config";
 
+let seedPromise: Promise<void> | null = null;
+
 /** Ensure defaults exist so the public site works on first request. */
 export async function ensureSeeded() {
-  await connectDB();
+  if (seedPromise) return seedPromise;
 
-  const settings = await SiteSettings.findOne();
-  if (!settings) {
-    await SiteSettings.create(seedSettings);
-  }
+  seedPromise = (async () => {
+    await connectDB();
 
-  const bannerCount = await Banner.countDocuments();
-  if (bannerCount === 0) {
-    await Banner.insertMany(seedBanners);
-  }
-
-  for (const page of seedPages) {
-    const exists = await Page.findOne({ slug: page.slug });
-    if (!exists) {
-      await Page.create(page);
+    const settings = await SiteSettings.findOne();
+    if (!settings) {
+      await SiteSettings.create(seedSettings);
     }
-  }
+
+    const bannerCount = await Banner.countDocuments();
+    if (bannerCount === 0) {
+      await Banner.insertMany(seedBanners);
+    }
+
+    for (const page of seedPages) {
+      const exists = await Page.findOne({ slug: page.slug });
+      if (!exists) {
+        await Page.create(page);
+      }
+    }
+  })().catch((err) => {
+    seedPromise = null;
+    throw err;
+  });
+
+  return seedPromise;
 }
 
-export async function getSiteSettings() {
+/** Deduped within a single RSC request so layout + pages share one DB round-trip. */
+export const getSiteSettings = cache(async () => {
   await ensureSeeded();
   const doc = await SiteSettings.findOne().lean();
   if (!doc) {
@@ -37,7 +50,7 @@ export async function getSiteSettings() {
     };
   }
   return doc;
-}
+});
 
 export async function getActiveBanners() {
   await ensureSeeded();

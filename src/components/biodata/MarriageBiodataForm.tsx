@@ -284,25 +284,25 @@ export function MarriageBiodataForm() {
   }
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/profiles/next-registration")
+    if (status !== "idle") return;
+
+    const ac = new AbortController();
+    fetch("/api/profiles/next-registration", { signal: ac.signal })
       .then((res) => res.json())
       .then((json) => {
-        if (!cancelled && json.registrationNumber) {
+        if (!ac.signal.aborted && json.registrationNumber) {
           setPreviewRegNo(json.registrationNumber);
         }
       })
       .catch(() => {
-        /* keep SEKM01 fallback */
+        /* aborted or network — keep SEKM01 fallback */
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [status]);
 
   useEffect(() => {
     try {
-      if (typeof window !== "undefined" && !localStorage.getItem(COACHMARK_KEY)) {
+      if (!localStorage.getItem(COACHMARK_KEY)) {
         setShowCoachmark(true);
       }
     } catch {
@@ -625,13 +625,13 @@ export function MarriageBiodataForm() {
         {/* Photo + top fields: stacked on mobile, side-by-side from md */}
         <div className="mb-4 flex flex-col items-stretch gap-3 md:flex-row md:items-start md:gap-4">
           <div className="order-1 mx-auto w-36 shrink-0 sm:w-40 md:order-2 md:mx-0 md:w-36">
-            <label className="flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--biodata-blue)]/35 bg-white shadow-sm transition hover:border-[var(--biodata-red)]/60 hover:shadow-md">
+            <label className="flex min-h-44 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--biodata-blue)]/35 bg-white shadow-sm transition hover:border-[var(--biodata-red)]/60 hover:shadow-md">
               {form.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={form.photoUrl}
                   alt="Profile"
-                  className="h-full w-full object-cover"
+                  className="h-auto w-full"
                 />
               ) : (
                 <span className="px-1.5 text-center text-xs leading-tight text-[var(--biodata-blue)]/70">

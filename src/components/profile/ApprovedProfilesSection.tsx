@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { getNameInitial } from "@/lib/name-initial";
 import { getApprovedProfiles } from "@/lib/profiles";
 import { siteConfig } from "@/site.config";
 
@@ -45,17 +45,20 @@ export async function ApprovedProfilesSection() {
                 key={p._id}
                 className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-[#0056b3]/10 transition hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4]">
+                <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4]">
                   {p.photoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={p.photoUrl}
                       alt={p.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[#0056b3]/25">
-                      {p.name.charAt(0) || "?"}
+                    <div
+                      className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[#0056b3]/25"
+                      suppressHydrationWarning
+                    >
+                      {getNameInitial(p.name)}
                     </div>
                   )}
                   <span
@@ -102,7 +105,7 @@ export async function ApprovedProfilesSection() {
         {/* {profiles.length > 0 ? (
           <p className="mt-8 text-center text-sm text-slate-500">
             For full biodata access,{" "}
-            <Link href="/profile-details/login" className="font-semibold text-[#0056b3] hover:underline">
+            <Link href="/admin/login" className="font-semibold text-[#0056b3] hover:underline">
               sign in to profile details
             </Link>
             .

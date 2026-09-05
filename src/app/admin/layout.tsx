@@ -5,40 +5,32 @@ import { siteConfig } from "@/site.config";
 
 export const dynamic = "force-dynamic";
 
-const links = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/settings", label: "Settings" },
-  { href: "/admin/banners", label: "Banner" },
-  { href: "/admin/pages", label: "Pages" },
-  { href: "/admin/enquiries", label: "Enquiries" },
-];
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Login page handles its own chrome via nested route group — check path via children only.
-  // Auth gate for protected pages is done in each page; layout shows shell when authenticated.
   const authed = await isAdminAuthenticated();
 
   return (
     <div className="min-h-dvh flex-1 bg-slate-100 text-slate-900">
       {authed ? (
-        <div className="mx-auto flex min-h-dvh max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row">
-          <aside className="w-full shrink-0 rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 lg:w-56">
-            <p className="font-display text-lg font-semibold text-[var(--primary)]">
-              {siteConfig.businessName}
-            </p>
-            <p className="text-xs text-slate-500">Admin</p>
-            <nav className="mt-4 flex flex-col gap-1">
-              {links.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="rounded-md px-3 py-2 text-sm font-medium hover:bg-slate-50"
-                >
-                  {l.label}
-                </Link>
-              ))}
-              <Link href="/" className="rounded-md px-3 py-2 text-sm text-slate-500 hover:bg-slate-50">
-                View site
+        <div className="mx-auto flex min-h-dvh max-w-lg flex-col px-4 py-5 sm:px-6">
+          <header className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+            <div className="min-w-0">
+              <p className="truncate font-display text-base font-semibold text-[var(--primary)]">
+                {siteConfig.businessName}
+              </p>
+              <p className="text-xs text-slate-500">Admin</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Link
+                href="/admin"
+                className="rounded-md px-2.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Home
+              </Link>
+              <Link
+                href="/"
+                className="rounded-md px-2.5 py-2 text-sm text-slate-500 hover:bg-slate-50"
+              >
+                Site
               </Link>
               <form
                 action={async () => {
@@ -53,13 +45,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               >
                 <button
                   type="submit"
-                  className="w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  className="rounded-md px-2.5 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
                 >
                   Log out
                 </button>
               </form>
-            </nav>
-          </aside>
+            </div>
+          </header>
           <div className="min-w-0 flex-1">{children}</div>
         </div>
       ) : (

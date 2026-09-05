@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ProfileCardActions } from "@/components/profile/ProfileCardActions";
 import { ProfileStatusBadge } from "@/components/profile/ProfileStatusBadge";
+import { getNameInitial } from "@/lib/name-initial";
 import type { ProfilePublic, ProfileStatus } from "@/lib/profiles";
 
 type Filter = "all" | ProfileStatus;
@@ -71,18 +72,21 @@ export function ProfileDetailsList({ profiles }: ProfileDetailsListProps) {
             >
               <Link
                 href={`/profile-details/${p._id}`}
-                className="group relative block aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4]"
+                className="group relative block aspect-[3/4] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4] transition hover:opacity-95"
               >
                 {p.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={p.photoUrl}
                     alt={p.name}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[var(--biodata-blue)]/25">
-                    {p.name.charAt(0) || "?"}
+                  <div
+                    className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[var(--biodata-blue)]/25"
+                    suppressHydrationWarning
+                  >
+                    {getNameInitial(p.name)}
                   </div>
                 )}
                 <span className="absolute left-3 top-3">

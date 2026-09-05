@@ -94,7 +94,7 @@ export function BiodataSheet({ profile }: { profile: ProfilePublic }) {
               <img
                 src={profile.photoUrl}
                 alt={profile.name}
-                className="aspect-[3/4] w-full object-cover"
+                className="h-auto w-full"
               />
             </div>
           ) : null}

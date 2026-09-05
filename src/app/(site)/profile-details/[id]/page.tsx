@@ -7,7 +7,7 @@ import { BiodataSheet } from "@/components/biodata/BiodataSheet";
 import { ProfileDetailToolbar } from "@/components/profile/ProfileDetailToolbar";
 import { ProfileStatusBadge } from "@/components/profile/ProfileStatusBadge";
 import { connectDB } from "@/lib/db";
-import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { serializeProfile } from "@/lib/profiles";
 import { MarriageProfile } from "@/models/MarriageProfile";
 
@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProfileDetailsDetailPage({ params }: Props) {
-  if (!(await isProfileGateAuthenticated())) {
-    redirect("/profile-details/login");
+  if (!(await isAdminAuthenticated())) {
+    redirect("/admin/login");
   }
 
   const { id } = await params;

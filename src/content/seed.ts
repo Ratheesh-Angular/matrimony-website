@@ -45,7 +45,7 @@ ${siteConfig.businessName} provides trusted matrimony services for Mudaliar and 
 
 ## Service
 
-திருமண வரன்கள் விரைவில் முடிவு செய்து தரப்படும்.
+${siteConfig.tamilTagline}
 
 ## How we work
 

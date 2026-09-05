@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { isProfileGateAuthenticated } from "@/lib/profile-gate-auth";
-import ProfileGateLoginForm from "./ProfileGateLoginForm";
+import { isAdminAuthenticated } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Profile access",
-  description: "Sign in to view matrimony profile details",
+  title: "Admin login",
+  description: "Sign in to manage matrimony profiles",
 };
 
 export default async function ProfileDetailsLoginPage() {
-  if (await isProfileGateAuthenticated()) {
-    redirect("/profile-details");
+  if (await isAdminAuthenticated()) {
+    redirect("/admin");
   }
-
-  return <ProfileGateLoginForm />;
+  redirect("/admin/login");
 }

@@ -3,9 +3,10 @@
  * Clone this repo, then edit this file for each business.
  */
 export const siteConfig = {
-  businessName: "Sekizhar Manamalai",
+  businessName: "சேக்கிழார் மணமாலை",
   tagline: "Mudaliar & Saiva Vellalar matrimony",
-  tamilTagline: "திருமண வரன்கள் விரைவில் முடிவு செய்து தரப்படும்",
+  tamilTagline:
+    "தொண்டை மண்டல சைவ முதலியார் மற்றும்\nசைவப் பிள்ளை சமூக மக்களுக்கான வரன் பதிவு தளம்",
   description:
     "Sekizhar Manamalai — trusted matrimony for Mudaliar and Saiva Vellalar families across Tamil Nadu, with 10+ years of experience and district-level community networks.",
 
@@ -27,6 +28,7 @@ export const siteConfig = {
   nav: [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
+    { label: "Gallery", href: "/gallery" },
     { label: "Contact", href: "/contact" },
     { label: "Location", href: "/location" },
   ],

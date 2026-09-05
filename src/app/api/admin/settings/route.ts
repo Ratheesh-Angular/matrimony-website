@@ -39,7 +39,7 @@ export async function PUT(request: Request) {
         x: body.socialLinks?.x ?? "",
       },
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   );
   return NextResponse.json(settings);
 }

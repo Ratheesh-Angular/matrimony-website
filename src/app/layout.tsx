@@ -22,6 +22,9 @@ const tamil = Noto_Sans_Tamil({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
   title: {
     default: siteConfig.businessName,
     template: `%s | ${siteConfig.businessName}`,

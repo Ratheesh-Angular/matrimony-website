@@ -8,9 +8,17 @@ export const ALLOWED_IMAGE_TYPES = new Set([
   "image/gif",
 ]);
 
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+export const ALLOWED_VIDEO_TYPES = new Set([
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
 
-export type UploadFolder = "profiles" | "banners";
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
+
+export type UploadFolder = "profiles" | "banners" | "gallery";
+export type MediaType = "image" | "video";
 
 export function safeUploadFileName(name: string, fallback: string) {
   const base = path.basename(name).replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -19,7 +27,7 @@ export function safeUploadFileName(name: string, fallback: string) {
 
 export function extensionFor(mime: string, originalName: string) {
   const fromName = path.extname(originalName).toLowerCase();
-  if (fromName && [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(fromName)) {
+  if (fromName && [".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".webm", ".mov"].includes(fromName)) {
     return fromName === ".jpeg" ? ".jpg" : fromName;
   }
   switch (mime) {
@@ -31,6 +39,12 @@ export function extensionFor(mime: string, originalName: string) {
       return ".webp";
     case "image/gif":
       return ".gif";
+    case "video/mp4":
+      return ".mp4";
+    case "video/webm":
+      return ".webm";
+    case "video/quicktime":
+      return ".mov";
     default:
       return ".bin";
   }
@@ -39,6 +53,12 @@ export function extensionFor(mime: string, originalName: string) {
 export function uniqueUploadFileName(originalName: string, mime: string, fallback: string) {
   const ext = extensionFor(mime, originalName);
   return `${Date.now()}-${safeUploadFileName(path.parse(originalName).name, fallback)}${ext}`;
+}
+
+export function mediaTypeFromMime(mime: string): MediaType | null {
+  if (ALLOWED_IMAGE_TYPES.has(mime)) return "image";
+  if (ALLOWED_VIDEO_TYPES.has(mime)) return "video";
+  return null;
 }
 
 function getCloudinaryConfig() {
@@ -59,7 +79,21 @@ export async function storePublicImage(options: {
   contentType: string;
   folder: UploadFolder;
 }): Promise<string> {
-  const { buffer, fileName, folder } = options;
+  const result = await storePublicMedia({
+    ...options,
+    resourceType: "image",
+  });
+  return result.url;
+}
+
+export async function storePublicMedia(options: {
+  buffer: Buffer;
+  fileName: string;
+  contentType: string;
+  folder: UploadFolder;
+  resourceType?: "image" | "video" | "auto";
+}): Promise<{ url: string; publicId: string; resourceType: string }> {
+  const { buffer, fileName, folder, resourceType = "auto" } = options;
   cloudinary.config(getCloudinaryConfig());
 
   const publicId = path.parse(fileName).name;
@@ -69,7 +103,7 @@ export async function storePublicImage(options: {
       {
         folder,
         public_id: publicId,
-        resource_type: "image",
+        resource_type: resourceType,
         overwrite: false,
       },
       (error, result) => {
@@ -77,9 +111,19 @@ export async function storePublicImage(options: {
           reject(error ?? new Error("Cloudinary upload did not return a URL."));
           return;
         }
-        resolve(result.secure_url);
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+          resourceType: result.resource_type || resourceType,
+        });
       },
     );
     upload.end(buffer);
   });
+}
+
+export async function destroyCloudinaryAsset(publicId: string, resourceType: "image" | "video") {
+  if (!publicId) return;
+  cloudinary.config(getCloudinaryConfig());
+  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
 }

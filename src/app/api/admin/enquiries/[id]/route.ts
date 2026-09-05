@@ -16,7 +16,9 @@ export async function PUT(request: Request, { params }: Ctx) {
   if (!["new", "read", "replied", "archived"].includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
-  const enquiry = await Enquiry.findByIdAndUpdate(id, { status }, { new: true });
+  const enquiry = await Enquiry.findByIdAndUpdate(id, { status }, {
+    returnDocument: "after",
+  });
   if (!enquiry) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

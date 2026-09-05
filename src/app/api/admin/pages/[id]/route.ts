@@ -26,7 +26,7 @@ export async function PUT(request: Request, { params }: Ctx) {
       seoDescription: body.seoDescription,
       published: Boolean(body.published),
     },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!page) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
