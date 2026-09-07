@@ -165,18 +165,18 @@ export function GalleryManager() {
               key={item._id}
               className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5"
             >
-              <div className="relative aspect-video bg-slate-100">
+              <div className="relative bg-slate-100">
                 {item.mediaType === "video" ? (
                   <video
                     src={item.url}
-                    className="h-full w-full object-cover"
+                    className="block h-auto w-full"
                     controls
                     playsInline
                     preload="metadata"
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.url} alt={item.title || "Gallery"} className="h-full w-full object-cover" />
+                  <img src={item.url} alt={item.title || "Gallery"} className="block h-auto w-full" />
                 )}
                 <span className="absolute left-2 top-2 rounded-md bg-black/60 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-white">
                   {item.mediaType}
