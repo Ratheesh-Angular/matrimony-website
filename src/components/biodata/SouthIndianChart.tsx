@@ -116,7 +116,7 @@ export function SouthIndianChart({
   const data = ensureHouses(houses);
 
   return (
-    <div className="font-tamil w-full max-w-[280px] sm:max-w-[320px]">
+    <div className="font-tamil w-full max-w-[320px] sm:max-w-[360px]">
       {editable && showPalette ? (
         <div className="mb-3">
           <p className="mb-2 text-center text-xs font-medium text-[var(--biodata-blue)]">

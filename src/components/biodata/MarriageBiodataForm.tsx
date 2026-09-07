@@ -80,6 +80,15 @@ const initial: FormState = {
 
 const COACHMARK_KEY = "biodata-jathagam-drag-tip-dismissed";
 
+/** Mirrors server rules in src/lib/upload.ts (kept local to avoid bundling Cloudinary). */
+const ALLOWED_PHOTO_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
 const sheetVars = {
   "--biodata-blue": "#1a3a5c",
   "--biodata-red": "#9b1b2e",
@@ -270,12 +279,15 @@ export function MarriageBiodataForm() {
   const [regNo, setRegNo] = useState("");
   const [previewRegNo, setPreviewRegNo] = useState("SEKM01");
   const [uploading, setUploading] = useState(false);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [activeChart, setActiveChart] = useState<"rasi" | "amsam">("rasi");
   const [activeDrag, setActiveDrag] = useState<ChartDragPayload | null>(null);
   const [dropTarget, setDropTarget] = useState<ChartDropTarget | null>(null);
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
   const [showCoachmark, setShowCoachmark] = useState(false);
   const dragMoved = useRef(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoPreviewRef = useRef("");
 
   const today = useMemo(() => formatRegistrationDate(), []);
 
@@ -309,6 +321,28 @@ export function MarriageBiodataForm() {
       setShowCoachmark(true);
     }
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewRef.current) {
+        URL.revokeObjectURL(photoPreviewRef.current);
+      }
+    };
+  }, []);
+
+  function clearPhotoPreview() {
+    if (photoPreviewRef.current) {
+      URL.revokeObjectURL(photoPreviewRef.current);
+      photoPreviewRef.current = "";
+    }
+    setPhotoPreviewUrl("");
+  }
+
+  function clearPhoto() {
+    clearPhotoPreview();
+    set("photoUrl", "");
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  }
 
   useEffect(() => {
     if (!activeDrag) return;
@@ -404,19 +438,50 @@ export function MarriageBiodataForm() {
 
   async function onPhotoChange(file: File | null) {
     if (!file) return;
+
+    if (!ALLOWED_PHOTO_TYPES.has(file.type)) {
+      setError("Only JPEG, PNG, WebP, or GIF images are allowed");
+      if (photoInputRef.current) photoInputRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      setError("File must be 5MB or smaller");
+      if (photoInputRef.current) photoInputRef.current.value = "";
+      return;
+    }
+
+    clearPhotoPreview();
+    const localUrl = URL.createObjectURL(file);
+    photoPreviewRef.current = localUrl;
+    setPhotoPreviewUrl(localUrl);
     setUploading(true);
     setError("");
+
     try {
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/profiles/upload", { method: "POST", body: fd });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Upload failed");
+      const contentType = res.headers.get("content-type") || "";
+      const json = contentType.includes("application/json")
+        ? await res.json().catch(() => null)
+        : null;
+      if (!res.ok) {
+        throw new Error(
+          (json && typeof json.error === "string" && json.error) ||
+            "Upload failed",
+        );
+      }
+      if (!json || typeof json.url !== "string" || !json.url) {
+        throw new Error("Upload failed");
+      }
+      clearPhotoPreview();
       set("photoUrl", json.url);
     } catch (err) {
+      clearPhotoPreview();
       setError(err instanceof Error ? err.message : "Photo upload failed");
     } finally {
       setUploading(false);
+      if (photoInputRef.current) photoInputRef.current.value = "";
     }
   }
 
@@ -471,6 +536,7 @@ export function MarriageBiodataForm() {
       setSavedId(json.id);
       setRegNo(json.registrationNumber);
       setStatus("success");
+      clearPhotoPreview();
       setForm(initial);
       setActiveDrag(null);
     } catch (err) {
@@ -625,31 +691,52 @@ export function MarriageBiodataForm() {
         {/* Photo + top fields: stacked on mobile, side-by-side from md */}
         <div className="mb-4 flex flex-col items-stretch gap-3 md:flex-row md:items-start md:gap-4">
           <div className="order-1 mx-auto w-36 shrink-0 sm:w-40 md:order-2 md:mx-0 md:w-36">
-            <label className="flex min-h-44 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--biodata-blue)]/35 bg-white shadow-sm transition hover:border-[var(--biodata-red)]/60 hover:shadow-md">
-              {form.photoUrl ? (
+            <label
+              className={`relative flex min-h-44 w-full flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--biodata-blue)]/35 bg-white shadow-sm transition hover:border-[var(--biodata-red)]/60 hover:shadow-md ${
+                uploading ? "pointer-events-none cursor-wait" : "cursor-pointer"
+              }`}
+            >
+              {photoPreviewUrl || form.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={form.photoUrl}
+                  src={photoPreviewUrl || form.photoUrl}
                   alt="Profile"
                   className="h-auto w-full"
                 />
               ) : (
                 <span className="px-1.5 text-center text-xs leading-tight text-[var(--biodata-blue)]/70">
-                  {uploading ? "…" : "புகைப்படம்"}
+                  புகைப்படம்
                 </span>
               )}
+              {uploading ? (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/80"
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <span
+                    className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--biodata-blue)]/25 border-t-[var(--biodata-red)]"
+                    aria-hidden
+                  />
+                  <span className="px-2 text-center text-[10px] leading-tight text-[var(--biodata-blue)]">
+                    பதிவேற்றுகிறது…
+                  </span>
+                </div>
+              ) : null}
               <input
+                ref={photoInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 className="sr-only"
+                disabled={uploading}
                 onChange={(e) => onPhotoChange(e.target.files?.[0] || null)}
               />
             </label>
-            {form.photoUrl ? (
+            {form.photoUrl && !uploading ? (
               <button
                 type="button"
                 className="mt-1.5 w-full text-xs text-[var(--biodata-red)] underline"
-                onClick={() => set("photoUrl", "")}
+                onClick={clearPhoto}
               >
                 Remove
               </button>
