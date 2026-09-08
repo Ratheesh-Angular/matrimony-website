@@ -67,7 +67,7 @@ export const siteConfig = {
     instagram:
       "https://www.instagram.com/damodharansenthilkumar4?stkn=MWJ6dGVya3Z2dmpnbA==",
     threads: "https://www.threads.com/@damodharansenthilkumar4",
-    x: "",
+    x: "https://x.com/senthilkum45252",
   },
 };
 
