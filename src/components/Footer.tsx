@@ -5,6 +5,7 @@ import { siteConfig } from "@/site.config";
 type SocialLinks = {
   facebook?: string;
   instagram?: string;
+  threads?: string;
   youtube?: string;
   x?: string;
 };
@@ -33,6 +34,14 @@ function InstagramIcon() {
       <rect x="3.5" y="3.5" width="17" height="17" rx="5" strokeWidth="1.8" />
       <circle cx="12" cy="12" r="3.6" strokeWidth="1.8" />
       <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function ThreadsIcon() {
+  return (
+    <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M17.505 13.1c-.15 2.95-1.95 4.65-4.8 4.65-3.25 0-5.35-2.35-5.35-6.15 0-3.85 2.15-6.2 5.35-6.2 2.55 0 4.2 1.35 4.7 3.55h1.85C19 5.8 16.65 3.5 12.7 3.5 7.95 3.5 4.85 6.85 4.85 11.6c0 4.7 3.05 8.1 7.85 8.1 4.25 0 7.15-2.75 7.4-6.85.05-.4-.25-.75-.65-.8-.4-.05-.75.2-.85.55-.1.3-.25.55-.5.85l-.1-.15Zm-1.55-2.45c-.2-1.75-1.4-2.95-3.4-2.95-2.35 0-3.7 1.6-3.7 4.45s1.35 4.4 3.7 4.4c1.95 0 3.15-1.15 3.4-2.95h-1.8c-.2 1-1 1.55-1.6 1.55-1.25 0-1.95-1.05-1.95-3s.7-3.05 1.95-3.05c.65 0 1.4.5 1.6 1.55h1.8Z" />
     </svg>
   );
 }
@@ -92,6 +101,7 @@ export function Footer({ phone, email, address, hours, socialLinks }: FooterProp
     facebook: socialLinks?.facebook ?? siteConfig.socialLinks.facebook,
     youtube: socialLinks?.youtube ?? siteConfig.socialLinks.youtube,
     instagram: socialLinks?.instagram ?? siteConfig.socialLinks.instagram,
+    threads: socialLinks?.threads ?? siteConfig.socialLinks.threads,
     x: socialLinks?.x ?? siteConfig.socialLinks.x,
   };
 
@@ -107,6 +117,9 @@ export function Footer({ phone, email, address, hours, socialLinks }: FooterProp
             </SocialLink>
             <SocialLink href={links.instagram} label="Instagram">
               <InstagramIcon />
+            </SocialLink>
+            <SocialLink href={links.threads} label="Threads">
+              <ThreadsIcon />
             </SocialLink>
             <SocialLink href={links.youtube} label="YouTube">
               <YoutubeIcon />

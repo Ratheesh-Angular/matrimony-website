@@ -38,7 +38,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const name = String(body.name || "").trim();
-    const gender = body.gender === "female" ? "female" : body.gender === "male" ? "male" : "";
+    const gender: "male" | "female" | null =
+      body.gender === "female" ? "female" : body.gender === "male" ? "male" : null;
     const contactNumber = String(body.contactNumber || "").trim();
 
     if (!name) {

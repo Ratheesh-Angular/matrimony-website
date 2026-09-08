@@ -64,7 +64,9 @@ export const siteConfig = {
   socialLinks: {
     facebook: "https://fb.me/g/4NOYtEvOz/jPqo3wUa?ref=share",
     youtube: "https://youtube.com/channel/UC5neLXNdS-p6uUf4v2IcDrA?si=FPeNgwYP0xsr_7_b",
-    instagram: "",
+    instagram:
+      "https://www.instagram.com/damodharansenthilkumar4?stkn=MWJ6dGVya3Z2dmpnbA==",
+    threads: "https://www.threads.com/@damodharansenthilkumar4",
     x: "",
   },
 };

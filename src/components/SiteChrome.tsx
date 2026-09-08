@@ -23,6 +23,7 @@ export async function SiteChrome() {
       facebook: settings.socialLinks?.facebook || socialLinks.facebook,
       youtube: settings.socialLinks?.youtube || socialLinks.youtube,
       instagram: settings.socialLinks?.instagram || socialLinks.instagram,
+      threads: socialLinks.threads,
       x: settings.socialLinks?.x || socialLinks.x,
     };
   } catch {
