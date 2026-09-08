@@ -13,6 +13,7 @@ export const seedSettings = {
   socialLinks: {
     facebook: siteConfig.socialLinks.facebook,
     instagram: siteConfig.socialLinks.instagram,
+    threads: siteConfig.socialLinks.threads,
     youtube: siteConfig.socialLinks.youtube,
     x: siteConfig.socialLinks.x,
   },

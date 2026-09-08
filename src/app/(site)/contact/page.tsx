@@ -75,6 +75,7 @@ export default async function ContactPage() {
       facebook: settings.socialLinks?.facebook || socialLinks.facebook,
       youtube: settings.socialLinks?.youtube || socialLinks.youtube,
       instagram: settings.socialLinks?.instagram || socialLinks.instagram,
+      threads: socialLinks.threads,
       x: settings.socialLinks?.x || socialLinks.x,
     };
   } catch {
@@ -87,6 +88,7 @@ export default async function ContactPage() {
       { key: "facebook", label: "Facebook", href: socialLinks.facebook },
       { key: "youtube", label: "YouTube", href: socialLinks.youtube },
       { key: "instagram", label: "Instagram", href: socialLinks.instagram },
+      { key: "threads", label: "Threads", href: socialLinks.threads },
       { key: "x", label: "X", href: socialLinks.x },
     ] as const
   ).filter((s) => Boolean(s.href));
