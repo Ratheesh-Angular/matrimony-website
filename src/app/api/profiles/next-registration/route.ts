@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import { formatRegistrationNumber } from "@/lib/biodata";
-import { MarriageProfile } from "@/models/MarriageProfile";
+import { allocateNextRegistrationNumber } from "@/lib/profiles";
 
 export async function GET() {
   try {
-    await connectDB();
-    const count = await MarriageProfile.countDocuments();
-    return NextResponse.json({
-      registrationNumber: formatRegistrationNumber(count + 1),
-    });
+    const registrationNumber = await allocateNextRegistrationNumber();
+    return NextResponse.json({ registrationNumber });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

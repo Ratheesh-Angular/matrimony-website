@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import {
   formatRegistrationDate,
-  formatRegistrationNumber,
   normalizeChart,
 } from "@/lib/biodata";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { serializeProfile } from "@/lib/profiles";
+import {
+  allocateNextRegistrationNumber,
+  isMongoDuplicateKeyError,
+  serializeProfile,
+} from "@/lib/profiles";
 import { MarriageProfile } from "@/models/MarriageProfile";
 
 export async function GET() {
@@ -55,13 +58,10 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
-    const count = await MarriageProfile.countDocuments();
-    const registrationNumber = formatRegistrationNumber(count + 1);
     const registrationDate = formatRegistrationDate();
-
     const address = body.address || {};
-    const profile = await MarriageProfile.create({
-      registrationNumber,
+
+    const payloadBase = {
       registrationDate,
       gender,
       name,
@@ -95,8 +95,32 @@ export async function POST(request: Request) {
         rasi: normalizeChart(body.horoscope?.rasi),
         amsam: normalizeChart(body.horoscope?.amsam),
       },
-      status: "new",
-    });
+      status: "new" as const,
+    };
+
+    const maxAttempts = 2;
+    let profile: InstanceType<typeof MarriageProfile> | null = null;
+    let lastErr: unknown;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const registrationNumber = await allocateNextRegistrationNumber();
+      try {
+        profile = await MarriageProfile.create({
+          ...payloadBase,
+          registrationNumber,
+        });
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (!isMongoDuplicateKeyError(err) || attempt === maxAttempts - 1) {
+          throw err;
+        }
+      }
+    }
+
+    if (!profile) {
+      throw lastErr ?? new Error("Unable to create profile");
+    }
 
     return NextResponse.json({
       ok: true,
@@ -105,6 +129,15 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error(err);
+    if (isMongoDuplicateKeyError(err)) {
+      return NextResponse.json(
+        {
+          error:
+            "Registration number conflict. Please try again / பதிவு எண் முரண்பாடு. மீண்டும் முயற்சிக்கவும்",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { error: "Unable to save your profile. Please try again later." },
       { status: 500 },

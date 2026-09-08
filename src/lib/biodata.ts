@@ -45,6 +45,26 @@ export function formatRegistrationNumber(seq: number): string {
   return `SEKM${String(seq).padStart(2, "0")}`;
 }
 
+/** Parse `SEKM01` / `SEKM27` → sequence number, or null if malformed. */
+export function parseRegistrationSequence(registrationNumber: string): number | null {
+  const m = /^SEKM(\d+)$/i.exec(String(registrationNumber || "").trim());
+  if (!m) return null;
+  const seq = Number.parseInt(m[1], 10);
+  return Number.isFinite(seq) ? seq : null;
+}
+
+/** Next number after the highest existing SEKM sequence (gaps do not reuse). */
+export function nextRegistrationNumberFromExisting(
+  registrationNumbers: Iterable<string>,
+): string {
+  let maxSeq = 0;
+  for (const n of registrationNumbers) {
+    const seq = parseRegistrationSequence(n);
+    if (seq !== null && seq > maxSeq) maxSeq = seq;
+  }
+  return formatRegistrationNumber(maxSeq + 1);
+}
+
 /**
  * South Indian chart cell → house index (0–11), or null for center.
  * Grid positions row*4+col:

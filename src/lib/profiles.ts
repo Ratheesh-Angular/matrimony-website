@@ -1,3 +1,4 @@
+import { nextRegistrationNumberFromExisting } from "@/lib/biodata";
 import { connectDB } from "@/lib/db";
 import type { MarriageProfileDoc } from "@/models/MarriageProfile";
 import { MarriageProfile } from "@/models/MarriageProfile";
@@ -130,5 +131,23 @@ export async function getApprovedProfiles(limit = 12): Promise<ProfilePublic[]> 
     .lean();
   return docs.map((d) =>
     serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
+  );
+}
+
+/** Next SEKM number from max existing sequence (not document count). */
+export async function allocateNextRegistrationNumber(): Promise<string> {
+  await connectDB();
+  const docs = await MarriageProfile.find({}, { registrationNumber: 1 }).lean();
+  return nextRegistrationNumberFromExisting(
+    docs.map((d) => String(d.registrationNumber || "")),
+  );
+}
+
+export function isMongoDuplicateKeyError(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: number }).code === 11000
   );
 }
