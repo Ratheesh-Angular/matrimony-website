@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { getNameInitial } from "@/lib/name-initial";
 import { getApprovedProfiles } from "@/lib/profiles";
-import { siteConfig } from "@/site.config";
 
 export async function ApprovedProfilesSection() {
   let profiles: Awaited<ReturnType<typeof getApprovedProfiles>> = [];
@@ -9,10 +9,6 @@ export async function ApprovedProfilesSection() {
   } catch {
     profiles = [];
   }
-
-  const whatsappHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
-    "வணக்கம் சேக்கிழார் மணமாலை! உங்கள் இணையதளத்தில் உள்ள அங்கீகரிக்கப்பட்ட வரனில் நான் ஆர்வம் கொண்டுள்ளேன். மேலும் விவரங்கள் தெரிந்துகொள்ள உதவுங்கள்.",
-  )}`;
 
   return (
     <section
@@ -88,29 +84,17 @@ export async function ApprovedProfilesSection() {
                   {p.occupation ? (
                     <p className="line-clamp-2 text-sm text-slate-500">{p.occupation}</p>
                   ) : null}
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-flex items-center justify-center rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+                  <Link
+                    href={`/profiles/${p._id}`}
+                    className="mt-auto inline-flex items-center justify-center rounded-lg bg-[#0056b3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#004494]"
                   >
-                    Contact for details
-                  </a>
+                    View details
+                  </Link>
                 </div>
               </li>
             ))}
           </ul>
         )}
-
-        {/* {profiles.length > 0 ? (
-          <p className="mt-8 text-center text-sm text-slate-500">
-            For full biodata access,{" "}
-            <Link href="/admin/login" className="font-semibold text-[#0056b3] hover:underline">
-              sign in to profile details
-            </Link>
-            .
-          </p>
-        ) : null} */}
       </div>
     </section>
   );

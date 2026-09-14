@@ -1,7 +1,9 @@
+import mongoose from "mongoose";
 import { nextRegistrationNumberFromExisting } from "@/lib/biodata";
 import { connectDB } from "@/lib/db";
 import type { MarriageProfileDoc } from "@/models/MarriageProfile";
 import { MarriageProfile } from "@/models/MarriageProfile";
+import { siteConfig } from "@/site.config";
 
 export type ProfileStatus = "new" | "approved" | "rejected";
 
@@ -132,6 +134,47 @@ export async function getApprovedProfiles(limit = 12): Promise<ProfilePublic[]> 
   return docs.map((d) =>
     serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
   );
+}
+
+export async function getApprovedProfileById(
+  id: string,
+): Promise<ProfilePublic | null> {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  await connectDB();
+  const doc = await MarriageProfile.findOne({
+    _id: id,
+    status: { $in: ["approved", "reviewed"] },
+  }).lean();
+  if (!doc) return null;
+  return serializeProfile(
+    doc as unknown as Parameters<typeof serializeProfile>[0],
+  );
+}
+
+/** Tamil WhatsApp enquiry including the profile's basic details. */
+export function buildProfileEnquiryMessage(
+  profile: Pick<
+    ProfilePublic,
+    | "name"
+    | "registrationNumber"
+    | "nakshatram"
+    | "rasi"
+    | "education"
+    | "occupation"
+  >,
+): string {
+  const lines = [
+    `வணக்கம் ${siteConfig.businessName}! உங்கள் இணையதளத்தில் உள்ள அங்கீகரிக்கப்பட்ட வரன் குறித்து நான் ஆர்வம் கொண்டுள்ளேன்.`,
+    "",
+    `பெயர்: ${profile.name}`,
+    `பதிவு எண்: ${profile.registrationNumber}`,
+  ];
+  const star = [profile.nakshatram, profile.rasi].filter(Boolean).join(" / ");
+  if (star) lines.push(`நட்சத்திரம் / ராசி: ${star}`);
+  if (profile.education) lines.push(`கல்வி: ${profile.education}`);
+  if (profile.occupation) lines.push(`வேலை: ${profile.occupation}`);
+  lines.push("", "மேலும் விவரங்கள் தெரிந்துகொள்ள உதவுங்கள்.");
+  return lines.join("\n");
 }
 
 /** Next SEKM number from max existing sequence (not document count). */

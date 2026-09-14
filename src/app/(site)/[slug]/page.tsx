@@ -17,6 +17,7 @@ const RESERVED = new Set([
   "api",
   "userdata",
   "profile-details",
+  "profiles",
 ]);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

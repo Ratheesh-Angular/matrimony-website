@@ -1,11 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { siteConfig } from "@/site.config";
-import { buildWhatsappUrl } from "@/lib/site-data";
 
 export function WhatsAppFab({ number }: { number: string }) {
-  if (!siteConfig.features.whatsapp || !number) return null;
+  const pathname = usePathname();
 
-  const href = buildWhatsappUrl(number);
+  if (!siteConfig.features.whatsapp || !number) return null;
+  if (pathname?.startsWith("/profiles/")) return null;
+
+  const href = `https://wa.me/${number}?text=${encodeURIComponent(
+    siteConfig.whatsappDefaultMessage,
+  )}`;
 
   return (
     <Link
