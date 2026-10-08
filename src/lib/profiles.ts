@@ -123,14 +123,15 @@ export function formatAddress(a: ProfilePublic["address"]): string {
   return parts.join(", ");
 }
 
-export async function getApprovedProfiles(limit = 12): Promise<ProfilePublic[]> {
+export async function getApprovedProfiles(
+  limit?: number,
+): Promise<ProfilePublic[]> {
   await connectDB();
-  const docs = await MarriageProfile.find({
+  const query = MarriageProfile.find({
     status: { $in: ["approved", "reviewed"] },
-  })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  }).sort({ createdAt: -1 });
+  if (limit != null) query.limit(limit);
+  const docs = await query.lean();
   return docs.map((d) =>
     serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
   );

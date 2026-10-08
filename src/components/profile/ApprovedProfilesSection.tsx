@@ -5,7 +5,7 @@ import { getApprovedProfiles } from "@/lib/profiles";
 export async function ApprovedProfilesSection() {
   let profiles: Awaited<ReturnType<typeof getApprovedProfiles>> = [];
   try {
-    profiles = await getApprovedProfiles(12);
+    profiles = await getApprovedProfiles();
   } catch {
     profiles = [];
   }
