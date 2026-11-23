@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BiodataSheet } from "@/components/biodata/BiodataSheet";
 import { ProfileWhatsAppCta } from "@/components/profile/ProfileWhatsAppCta";
+import { isMemberPremium } from "@/lib/member-auth";
 import {
   buildProfileEnquiryMessage,
   getApprovedProfileById,
@@ -18,6 +19,9 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  if (!(await isMemberPremium())) {
+    return { title: "Premium required" };
+  }
   const { id } = await params;
   try {
     const profile = await getApprovedProfileById(id);
@@ -32,6 +36,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicProfilePage({ params }: Props) {
+  if (!(await isMemberPremium())) {
+    redirect("/premium");
+  }
+
   const { id } = await params;
 
   let profile = null;
@@ -57,7 +65,7 @@ export default async function PublicProfilePage({ params }: Props) {
     <div className="min-h-[60vh] bg-[linear-gradient(165deg,#f8f1e4_0%,#fffef8_45%,#e8f0fa_100%)] py-10 sm:py-14">
       <div className="mx-auto mb-6 max-w-4xl px-4 sm:px-6">
         <Link
-          href="/#approved-profiles"
+          href="/profiles"
           className="font-tamil text-sm font-semibold text-[#0056b3] hover:underline"
         >
           ← அங்கீகரிக்கப்பட்ட வரன்கள்

@@ -2,11 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/site.config";
 import { MobileNav } from "@/components/MobileNav";
+import { MemberNavActions } from "@/components/member/MemberNavActions";
+import { getMemberFromSession } from "@/lib/member-auth";
 
-export function Header() {
+export async function Header() {
+  const member = await getMemberFromSession();
+  const authenticated = Boolean(member);
+  const isPremium = Boolean(member?.isPremium);
+
   return (
     <header className="sticky top-0 z-40 border-b border-black/5 bg-[var(--surface)]/90 backdrop-blur-md">
-      <MobileNav>
+      <MobileNav
+        authSlot={
+          <MemberNavActions
+            authenticated={authenticated}
+            isPremium={isPremium}
+          />
+        }
+      >
         <Link href="/" className="flex items-center gap-3">
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10 sm:h-11 sm:w-11">
             <Image
@@ -33,6 +46,10 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <MemberNavActions
+            authenticated={authenticated}
+            isPremium={isPremium}
+          />
         </nav>
       </MobileNav>
     </header>

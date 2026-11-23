@@ -1,11 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { cloneElement, isValidElement, useState, type ReactElement, type ReactNode } from "react";
 import { siteConfig } from "@/site.config";
 
-export function MobileNav({ children }: { children: ReactNode }) {
+export function MobileNav({
+  children,
+  authSlot,
+}: {
+  children: ReactNode;
+  authSlot?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
+
+  const mobileAuth =
+    authSlot && isValidElement(authSlot)
+      ? cloneElement(authSlot as ReactElement<{ onNavigate?: () => void }>, {
+          onNavigate: () => setOpen(false),
+        })
+      : authSlot;
 
   return (
     <>
@@ -35,6 +48,7 @@ export function MobileNav({ children }: { children: ReactNode }) {
                 {item.label}
               </Link>
             ))}
+            {mobileAuth}
           </nav>
         </div>
       ) : null}

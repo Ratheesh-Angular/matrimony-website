@@ -27,11 +27,17 @@ export const siteConfig = {
 
   nav: [
     { label: "Home", href: "/" },
+    { label: "Profiles", href: "/profiles" },
     { label: "About", href: "/about" },
     { label: "Gallery", href: "/gallery" },
     { label: "Contact", href: "/contact" },
     { label: "Location", href: "/location" },
   ],
+
+  /** Lifetime premium unlock shown on paywall (must match PREMIUM_AMOUNT_PAISE / 100) */
+  premium: {
+    amountInr: 260,
+  },
 
   features: {
     whatsapp: true,

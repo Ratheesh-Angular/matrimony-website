@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const username = String(body.username || "").trim();
     const password = String(body.password || "");
-    if (!checkProfileGateCredentials(username, password)) {
+    if (!(await checkProfileGateCredentials(username, password))) {
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
     const token = createProfileGateSessionToken();

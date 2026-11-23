@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
-import { runtimeEnv } from "@/lib/runtime-env";
+import { runtimeEnv, runtimeEnvAsync } from "@/lib/runtime-env";
 
 const COOKIE_NAME = "admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -84,15 +84,15 @@ export function getClearAdminCookieOptions() {
  * Prefers ADMIN_USERNAME / ADMIN_PASSWORD when both are set;
  * otherwise uses PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD.
  */
-export function checkAdminCredentials(username: string, password: string) {
-  const adminUser = runtimeEnv("ADMIN_USERNAME");
-  const adminPass = runtimeEnv("ADMIN_PASSWORD");
+export async function checkAdminCredentials(username: string, password: string) {
+  const adminUser = await runtimeEnvAsync("ADMIN_USERNAME");
+  const adminPass = await runtimeEnvAsync("ADMIN_PASSWORD");
   if (adminUser && adminPass) {
     return safeEqualStrings(username, adminUser) && safeEqualStrings(password, adminPass);
   }
 
-  const expectedUser = runtimeEnv("PROFILE_GATE_USERNAME");
-  const expectedPass = runtimeEnv("PROFILE_GATE_PASSWORD");
+  const expectedUser = await runtimeEnvAsync("PROFILE_GATE_USERNAME");
+  const expectedPass = await runtimeEnvAsync("PROFILE_GATE_PASSWORD");
   if (!expectedUser || !expectedPass) {
     throw new Error(
       "Admin credentials are not configured. Set PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD (or ADMIN_USERNAME / ADMIN_PASSWORD).",

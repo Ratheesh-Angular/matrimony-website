@@ -1,0 +1,107 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getNameInitial } from "@/lib/name-initial";
+import { isMemberPremium } from "@/lib/member-auth";
+import { getApprovedProfiles } from "@/lib/profiles";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Approved profiles",
+};
+
+export default async function ProfilesListPage() {
+  if (!(await isMemberPremium())) {
+    redirect("/premium");
+  }
+
+  let profiles: Awaited<ReturnType<typeof getApprovedProfiles>> = [];
+  try {
+    profiles = await getApprovedProfiles();
+  } catch {
+    profiles = [];
+  }
+
+  return (
+    <div className="min-h-[60vh] bg-[linear-gradient(165deg,#fffef8_0%,#f8f1e4_50%,#e8f0fa_100%)]">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <header className="mb-10 text-center">
+          <h1 className="font-tamil text-2xl font-bold text-[#d93025] sm:text-3xl">
+            அங்கீகரிக்கப்பட்ட வரன்கள்
+          </h1>
+          <p className="mt-2 text-sm text-[#0056b3] sm:text-base">
+            Approved profiles · premium access
+          </p>
+        </header>
+
+        {profiles.length === 0 ? (
+          <div className="rounded-2xl border border-[#0056b3]/15 bg-white/80 px-6 py-14 text-center shadow-sm">
+            <p className="font-tamil text-lg text-[#0056b3]">
+              விரைவில் அங்கீகரிக்கப்பட்ட வரன்கள் பதிவேற்றப்படும்
+            </p>
+            <p className="mt-2 text-sm text-slate-500">
+              Approved profiles will appear here once reviewed.
+            </p>
+          </div>
+        ) : (
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {profiles.map((p) => (
+              <li
+                key={p._id}
+                className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-[#0056b3]/10 transition hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-[#e8f0fa] to-[#f8f1e4]">
+                  {p.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.photoUrl}
+                      alt={p.name}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-full items-center justify-center font-tamil text-4xl font-bold text-[#0056b3]/25"
+                      suppressHydrationWarning
+                    >
+                      {getNameInitial(p.name)}
+                    </div>
+                  )}
+                  <span
+                    className={`absolute left-3 top-3 rounded-md px-2 py-0.5 text-xs font-bold text-white ${
+                      p.gender === "female" ? "bg-rose-500" : "bg-[#0056b3]"
+                    }`}
+                  >
+                    {p.gender === "female" ? "பெண்" : "ஆண்"}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col gap-2 p-5">
+                  <p className="font-tamil text-lg font-bold text-[#d93025]">
+                    {p.name}
+                  </p>
+                  <p className="text-xs font-semibold text-[#0056b3]">
+                    {p.registrationNumber} · {p.registrationDate}
+                  </p>
+                  {(p.nakshatram || p.rasi) && (
+                    <p className="text-sm text-slate-700">
+                      {[p.nakshatram, p.rasi].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {p.education ? (
+                    <p className="text-sm text-slate-600">{p.education}</p>
+                  ) : null}
+                  <Link
+                    href={`/profiles/${p._id}`}
+                    className="mt-auto inline-flex items-center justify-center rounded-lg bg-[#0056b3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#004494]"
+                  >
+                    View details
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}

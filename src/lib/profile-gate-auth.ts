@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
-import { runtimeEnv } from "@/lib/runtime-env";
+import { runtimeEnv, runtimeEnvAsync } from "@/lib/runtime-env";
 
 const COOKIE_NAME = "profile_gate_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -76,9 +76,9 @@ export function getClearProfileGateCookieOptions() {
   };
 }
 
-export function checkProfileGateCredentials(username: string, password: string) {
-  const expectedUser = runtimeEnv("PROFILE_GATE_USERNAME");
-  const expectedPass = runtimeEnv("PROFILE_GATE_PASSWORD");
+export async function checkProfileGateCredentials(username: string, password: string) {
+  const expectedUser = await runtimeEnvAsync("PROFILE_GATE_USERNAME");
+  const expectedPass = await runtimeEnvAsync("PROFILE_GATE_PASSWORD");
   if (!expectedUser || !expectedPass) {
     throw new Error("PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD are not configured");
   }

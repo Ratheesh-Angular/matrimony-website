@@ -1,8 +1,55 @@
 import Link from "next/link";
 import { getNameInitial } from "@/lib/name-initial";
+import { isMemberPremium } from "@/lib/member-auth";
 import { getApprovedProfiles } from "@/lib/profiles";
+import { siteConfig } from "@/site.config";
 
 export async function ApprovedProfilesSection() {
+  const premium = await isMemberPremium();
+
+  if (!premium) {
+    const amountInr = siteConfig.premium?.amountInr ?? 260;
+    return (
+      <section
+        id="approved-profiles"
+        className="border-y border-black/5 bg-[linear-gradient(165deg,#fffef8_0%,#f8f1e4_50%,#e8f0fa_100%)]"
+      >
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <header className="mb-10 text-center">
+            <h2 className="font-tamil text-2xl font-bold text-[#d93025] sm:text-3xl">
+              அங்கீகரிக்கப்பட்ட வரன்கள்
+            </h2>
+            <p className="mt-2 text-sm text-[#0056b3] sm:text-base">
+              Approved profiles · for premium members
+            </p>
+          </header>
+
+          <div className="mx-auto max-w-xl rounded-2xl border border-[#0056b3]/15 bg-white/90 px-6 py-12 text-center shadow-sm">
+            <p className="font-tamil text-lg font-semibold text-[#0056b3]">
+              வரன்களைப் பார்க்க பிரீமியம் உறுப்பினர் ஆகுங்கள்
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              Profile photos and details are available after a one-time payment
+              of ₹{amountInr} for lifetime premium access.
+            </p>
+            <Link
+              href="/premium"
+              className="mt-6 inline-flex items-center justify-center rounded-lg bg-[#d93025] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#b8251c]"
+            >
+              Unlock for ₹{amountInr}
+            </Link>
+            <p className="mt-4 text-sm text-slate-500">
+              Already a member?{" "}
+              <Link href="/login" className="font-semibold text-[#0056b3]">
+                Login
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   let profiles: Awaited<ReturnType<typeof getApprovedProfiles>> = [];
   try {
     profiles = await getApprovedProfiles();
@@ -23,6 +70,12 @@ export async function ApprovedProfilesSection() {
           <p className="mt-2 text-sm text-[#0056b3] sm:text-base">
             Approved profiles · verified by our team
           </p>
+          <Link
+            href="/profiles"
+            className="mt-3 inline-block text-sm font-semibold text-[#0056b3] hover:underline"
+          >
+            View all profiles →
+          </Link>
         </header>
 
         {profiles.length === 0 ? (
@@ -69,7 +122,9 @@ export async function ApprovedProfilesSection() {
                   </span>
                 </div>
                 <div className="flex flex-1 flex-col gap-2 p-5">
-                  <p className="font-tamil text-lg font-bold text-[#d93025]">{p.name}</p>
+                  <p className="font-tamil text-lg font-bold text-[#d93025]">
+                    {p.name}
+                  </p>
                   <p className="text-xs font-semibold text-[#0056b3]">
                     {p.registrationNumber} · {p.registrationDate}
                   </p>
@@ -82,7 +137,9 @@ export async function ApprovedProfilesSection() {
                     <p className="text-sm text-slate-600">{p.education}</p>
                   ) : null}
                   {p.occupation ? (
-                    <p className="line-clamp-2 text-sm text-slate-500">{p.occupation}</p>
+                    <p className="line-clamp-2 text-sm text-slate-500">
+                      {p.occupation}
+                    </p>
                   ) : null}
                   <Link
                     href={`/profiles/${p._id}`}
