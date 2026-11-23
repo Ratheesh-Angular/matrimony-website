@@ -123,6 +123,96 @@ export function formatAddress(a: ProfilePublic["address"]): string {
   return parts.join(", ");
 }
 
+export type AdminProfileFilter = "all" | ProfileStatus;
+
+export const ADMIN_PROFILES_PAGE_SIZE = 20;
+
+const APPROVED_STATUSES = ["approved", "reviewed"] as const;
+const REJECTED_STATUSES = ["rejected", "archived"] as const;
+
+function adminStatusMongoFilter(
+  status: AdminProfileFilter,
+): Record<string, unknown> {
+  if (status === "approved") {
+    return { status: { $in: [...APPROVED_STATUSES] } };
+  }
+  if (status === "rejected") {
+    return { status: { $in: [...REJECTED_STATUSES] } };
+  }
+  if (status === "new") {
+    return {
+      status: {
+        $nin: [...APPROVED_STATUSES, ...REJECTED_STATUSES],
+      },
+    };
+  }
+  return {};
+}
+
+export type AdminProfilesPageResult = {
+  items: ProfilePublic[];
+  total: number;
+  page: number;
+  pageSize: number;
+  status: AdminProfileFilter;
+  counts: Record<AdminProfileFilter, number>;
+};
+
+/** Paginated admin list with status tab counts (includes legacy status values). */
+export async function getAdminProfilesPage(opts: {
+  page?: number;
+  pageSize?: number;
+  status?: AdminProfileFilter;
+}): Promise<AdminProfilesPageResult> {
+  await connectDB();
+
+  const pageSize = Math.max(1, opts.pageSize ?? ADMIN_PROFILES_PAGE_SIZE);
+  const status: AdminProfileFilter =
+    opts.status === "new" ||
+    opts.status === "approved" ||
+    opts.status === "rejected"
+      ? opts.status
+      : "all";
+
+  const filter = adminStatusMongoFilter(status);
+
+  const [all, approved, rejected, total] = await Promise.all([
+    MarriageProfile.countDocuments({}),
+    MarriageProfile.countDocuments(adminStatusMongoFilter("approved")),
+    MarriageProfile.countDocuments(adminStatusMongoFilter("rejected")),
+    MarriageProfile.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
+  const requestedPage = Math.max(1, Math.floor(opts.page ?? 1));
+  const page = Math.min(requestedPage, totalPages);
+  const skip = (page - 1) * pageSize;
+
+  const pageDocs = await MarriageProfile.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(pageSize)
+    .lean();
+
+  const counts: Record<AdminProfileFilter, number> = {
+    all,
+    approved,
+    rejected,
+    new: Math.max(0, all - approved - rejected),
+  };
+
+  return {
+    items: pageDocs.map((d) =>
+      serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
+    ),
+    total,
+    page,
+    pageSize,
+    status,
+    counts,
+  };
+}
+
 export async function getApprovedProfiles(
   limit?: number,
 ): Promise<ProfilePublic[]> {

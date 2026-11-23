@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ProfileDetailsList } from "@/components/profile/ProfileDetailsList";
-import { connectDB } from "@/lib/db";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { serializeProfile } from "@/lib/profiles";
-import { MarriageProfile } from "@/models/MarriageProfile";
+import {
+  ADMIN_PROFILES_PAGE_SIZE,
+  getAdminProfilesPage,
+  type AdminProfileFilter,
+} from "@/lib/profiles";
 
 export const dynamic = "force-dynamic";
 
@@ -14,22 +16,53 @@ export const metadata: Metadata = {
   description: "Browse submitted matrimony biodata profiles",
 };
 
-export default async function ProfileDetailsPage() {
+function parseStatus(raw: string | string[] | undefined): AdminProfileFilter {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value === "new" || value === "approved" || value === "rejected") {
+    return value;
+  }
+  return "all";
+}
+
+function parsePage(raw: string | string[] | undefined): number {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const n = Number.parseInt(value ?? "1", 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+export default async function ProfileDetailsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string | string[]; status?: string | string[] }>;
+}) {
   if (!(await isAdminAuthenticated())) {
     redirect("/admin/login");
   }
 
-  let profiles: ReturnType<typeof serializeProfile>[] = [];
+  const params = await searchParams;
+  const status = parseStatus(params.status);
+  const requestedPage = parsePage(params.page);
+
+  let result: Awaited<ReturnType<typeof getAdminProfilesPage>> = {
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: ADMIN_PROFILES_PAGE_SIZE,
+    status,
+    counts: { all: 0, new: 0, approved: 0, rejected: 0 },
+  };
 
   try {
-    await connectDB();
-    const docs = await MarriageProfile.find().sort({ createdAt: -1 }).lean();
-    profiles = docs.map((d) =>
-      serializeProfile(d as unknown as Parameters<typeof serializeProfile>[0]),
-    );
+    result = await getAdminProfilesPage({
+      page: requestedPage,
+      pageSize: ADMIN_PROFILES_PAGE_SIZE,
+      status,
+    });
   } catch {
-    profiles = [];
+    // keep empty result
   }
+
+  const totalAll = result.counts.all;
 
   return (
     <div
@@ -48,7 +81,7 @@ export default async function ProfileDetailsPage() {
             பதிவுகள்
           </h1>
           <p className="mt-2 text-[var(--biodata-blue)]">
-            Submitted biodata profiles · {profiles.length} total
+            Submitted biodata profiles · {totalAll} total
           </p>
           <Link
             href="/#biodata-form"
@@ -58,7 +91,7 @@ export default async function ProfileDetailsPage() {
           </Link>
         </header>
 
-        {profiles.length === 0 ? (
+        {totalAll === 0 ? (
           <div className="rounded-xl border border-[var(--biodata-blue)]/20 bg-white/80 px-6 py-16 text-center shadow-sm">
             <p className="font-tamil text-lg text-[var(--biodata-blue)]">
               இன்னும் பதிவுகள் இல்லை
@@ -74,7 +107,14 @@ export default async function ProfileDetailsPage() {
             </Link>
           </div>
         ) : (
-          <ProfileDetailsList profiles={profiles} />
+          <ProfileDetailsList
+            profiles={result.items}
+            total={result.total}
+            page={result.page}
+            pageSize={result.pageSize}
+            status={result.status}
+            counts={result.counts}
+          />
         )}
       </div>
     </div>

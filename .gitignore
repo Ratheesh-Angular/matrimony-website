@@ -39,6 +39,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Cloudinary export (local migration only)
+profiles_2026-11-23_18_19/
+
 # vercel
 .vercel
 
