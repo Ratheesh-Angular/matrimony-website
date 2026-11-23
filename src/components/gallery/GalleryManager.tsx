@@ -212,7 +212,7 @@ export function GalleryManager() {
       <ConfirmDialog
         open={Boolean(deleteId)}
         title="Delete this media?"
-        message="This removes it from the gallery and Cloudinary."
+        message="This removes it from the gallery and deletes the file from storage."
         confirmLabel="Delete"
         variant="danger"
         loading={deleting}

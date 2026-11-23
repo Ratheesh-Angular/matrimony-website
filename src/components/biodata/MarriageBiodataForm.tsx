@@ -80,7 +80,7 @@ const initial: FormState = {
 
 const COACHMARK_KEY = "biodata-jathagam-drag-tip-dismissed";
 
-/** Mirrors server rules in src/lib/upload.ts (kept local to avoid bundling Cloudinary). */
+/** Mirrors server rules in src/lib/upload.ts (kept local to avoid bundling upload SDK). */
 const ALLOWED_PHOTO_TYPES = new Set([
   "image/jpeg",
   "image/png",

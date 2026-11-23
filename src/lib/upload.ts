@@ -1,5 +1,9 @@
 import path from "path";
-import { v2 as cloudinary } from "cloudinary";
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -61,16 +65,43 @@ export function mediaTypeFromMime(mime: string): MediaType | null {
   return null;
 }
 
-function getCloudinaryConfig() {
-  const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
-  const api_key = process.env.CLOUDINARY_API_KEY;
-  const api_secret = process.env.CLOUDINARY_API_SECRET;
-  if (!cloud_name || !api_key || !api_secret) {
+type R2Config = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucket: string;
+  publicBaseUrl: string;
+  endpoint: string;
+};
+
+function getR2Config(): R2Config {
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const bucket = process.env.R2_BUCKET_NAME;
+  const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBaseUrl) {
     throw new Error(
-      "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+      "R2 is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, and R2_PUBLIC_BASE_URL.",
     );
   }
-  return { cloud_name, api_key, api_secret };
+  const endpoint =
+    process.env.R2_ENDPOINT?.replace(/\/$/, "") ||
+    `https://${accountId}.r2.cloudflarestorage.com`;
+  return { accessKeyId, secretAccessKey, bucket, publicBaseUrl, endpoint };
+}
+
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    const { accessKeyId, secretAccessKey, endpoint } = getR2Config();
+    s3Client = new S3Client({
+      region: "auto",
+      endpoint,
+      credentials: { accessKeyId, secretAccessKey },
+    });
+  }
+  return s3Client;
 }
 
 export async function storePublicImage(options: {
@@ -93,37 +124,42 @@ export async function storePublicMedia(options: {
   folder: UploadFolder;
   resourceType?: "image" | "video" | "auto";
 }): Promise<{ url: string; publicId: string; resourceType: string }> {
-  const { buffer, fileName, folder, resourceType = "auto" } = options;
-  cloudinary.config(getCloudinaryConfig());
+  const { buffer, fileName, contentType, folder, resourceType = "auto" } = options;
+  const { bucket, publicBaseUrl } = getR2Config();
+  const objectKey = `${folder}/${fileName}`;
 
-  const publicId = path.parse(fileName).name;
+  await getS3Client().send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  );
 
-  return new Promise((resolve, reject) => {
-    const upload = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        public_id: publicId,
-        resource_type: resourceType,
-        overwrite: false,
-      },
-      (error, result) => {
-        if (error || !result?.secure_url) {
-          reject(error ?? new Error("Cloudinary upload did not return a URL."));
-          return;
-        }
-        resolve({
-          url: result.secure_url,
-          publicId: result.public_id,
-          resourceType: result.resource_type || resourceType,
-        });
-      },
-    );
-    upload.end(buffer);
-  });
+  const resolvedType =
+    resourceType === "auto"
+      ? (mediaTypeFromMime(contentType) ?? "image")
+      : resourceType;
+
+  return {
+    url: `${publicBaseUrl}/${objectKey}`,
+    publicId: objectKey,
+    resourceType: resolvedType,
+  };
 }
 
-export async function destroyCloudinaryAsset(publicId: string, resourceType: "image" | "video") {
-  if (!publicId) return;
-  cloudinary.config(getCloudinaryConfig());
-  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+/** Deletes an object from R2 when `objectKey` is a key created by this app. */
+export async function destroyStoredMedia(objectKey: string) {
+  if (!objectKey) return;
+  if (!/^(profiles|banners|gallery)\//.test(objectKey)) {
+    return;
+  }
+  const { bucket } = getR2Config();
+  await getS3Client().send(
+    new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+    }),
+  );
 }

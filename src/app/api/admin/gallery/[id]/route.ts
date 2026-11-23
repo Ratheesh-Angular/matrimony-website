@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { destroyCloudinaryAsset } from "@/lib/upload";
+import { destroyStoredMedia } from "@/lib/upload";
 import { GalleryItem } from "@/models/GalleryItem";
 
 type Props = { params: Promise<{ id: string }> };
@@ -82,12 +82,9 @@ export async function DELETE(_request: Request, { params }: Props) {
 
     if (item.publicId) {
       try {
-        await destroyCloudinaryAsset(
-          item.publicId,
-          item.mediaType === "video" ? "video" : "image",
-        );
+        await destroyStoredMedia(item.publicId);
       } catch (err) {
-        console.error("Cloudinary delete failed:", err);
+        console.error("R2 delete failed:", err);
       }
     }
 
