@@ -1,24 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { cloneElement, isValidElement, useState, type ReactElement, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { MemberNavActions } from "@/components/member/MemberNavActions";
 import { siteConfig } from "@/site.config";
 
 export function MobileNav({
   children,
-  authSlot,
+  authenticated = false,
+  isPremium = false,
 }: {
   children: ReactNode;
-  authSlot?: ReactNode;
+  authenticated?: boolean;
+  isPremium?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-
-  const mobileAuth =
-    authSlot && isValidElement(authSlot)
-      ? cloneElement(authSlot as ReactElement<{ onNavigate?: () => void }>, {
-          onNavigate: () => setOpen(false),
-        })
-      : authSlot;
 
   return (
     <>
@@ -48,7 +44,11 @@ export function MobileNav({
                 {item.label}
               </Link>
             ))}
-            {mobileAuth}
+            <MemberNavActions
+              authenticated={authenticated}
+              isPremium={isPremium}
+              onNavigate={() => setOpen(false)}
+            />
           </nav>
         </div>
       ) : null}

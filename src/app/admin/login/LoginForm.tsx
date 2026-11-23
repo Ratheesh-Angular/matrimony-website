@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export default function AdminLoginForm() {
   const router = useRouter();
@@ -53,12 +54,10 @@ export default function AdminLoginForm() {
         </label>
         <label className="block text-sm">
           <span className="mb-1 block font-medium">Password</span>
-          <input
-            type="password"
+          <PasswordInput
             name="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-md border border-slate-200 px-3 py-2.5"
           />
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}

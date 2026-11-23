@@ -3,8 +3,26 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 type Mode = "login" | "register";
+
+function IndiaFlagIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 16"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <rect width="24" height="16" rx="1.5" fill="#fff" />
+      <rect width="24" height="5.33" y="0" fill="#FF9933" />
+      <rect width="24" height="5.33" y="10.67" fill="#138808" />
+      <circle cx="12" cy="8" r="2.1" fill="none" stroke="#000080" strokeWidth="0.7" />
+      <circle cx="12" cy="8" r="0.35" fill="#000080" />
+    </svg>
+  );
+}
 
 export function MemberAuthForm({
   mode,
@@ -54,6 +72,8 @@ export function MemberAuthForm({
 
   return (
     <form
+      method="post"
+      action="#"
       onSubmit={onSubmit}
       className="w-full max-w-sm space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-black/5"
     >
@@ -70,40 +90,49 @@ export function MemberAuthForm({
 
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Mobile number</span>
-        <input
-          type="tel"
-          name="phone"
-          required
-          inputMode="numeric"
-          autoComplete="tel"
-          placeholder="10-digit number"
-          className="w-full rounded-md border border-slate-200 px-3 py-2.5"
-          autoFocus
-        />
+        <div className="relative">
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center gap-1.5 pl-3">
+            <IndiaFlagIcon className="h-3.5 w-[1.35rem] shrink-0 rounded-[2px] shadow-sm ring-1 ring-black/10" />
+            <span className="text-sm font-medium text-slate-600">+91</span>
+            <span className="h-4 w-px bg-slate-200" aria-hidden />
+          </span>
+          <input
+            type="tel"
+            name="phone"
+            required
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="10-digit number"
+            maxLength={10}
+            pattern="[6-9][0-9]{9}"
+            title="Enter a 10-digit Indian mobile number"
+            className="w-full rounded-md border border-slate-200 py-2.5 pl-[5.25rem] pr-3"
+            autoFocus
+            onInput={(e) => {
+              e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "").slice(0, 10);
+            }}
+          />
+        </div>
       </label>
 
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Password</span>
-        <input
-          type="password"
+        <PasswordInput
           name="password"
           required
           minLength={6}
           autoComplete={mode === "login" ? "current-password" : "new-password"}
-          className="w-full rounded-md border border-slate-200 px-3 py-2.5"
         />
       </label>
 
       {mode === "register" ? (
         <label className="block text-sm">
           <span className="mb-1 block font-medium">Confirm password</span>
-          <input
-            type="password"
+          <PasswordInput
             name="confirmPassword"
             required
             minLength={6}
             autoComplete="new-password"
-            className="w-full rounded-md border border-slate-200 px-3 py-2.5"
           />
         </label>
       ) : null}

@@ -134,18 +134,27 @@ export function getClearMemberCookieOptions() {
 }
 
 export async function getMemberFromSession(): Promise<MemberDoc | null> {
-  const jar = await cookies();
-  const parsed = parseMemberSessionToken(jar.get(COOKIE_NAME)?.value);
-  if (!parsed) return null;
+  try {
+    const jar = await cookies();
+    const parsed = parseMemberSessionToken(jar.get(COOKIE_NAME)?.value);
+    if (!parsed) return null;
 
-  await connectDB();
-  const member = await Member.findById(parsed.memberId);
-  return member as MemberDoc | null;
+    await connectDB();
+    const member = await Member.findById(parsed.memberId);
+    return member as MemberDoc | null;
+  } catch (err) {
+    console.error("getMemberFromSession failed", err);
+    return null;
+  }
 }
 
 export async function isMemberPremium(): Promise<boolean> {
-  const member = await getMemberFromSession();
-  return Boolean(member?.isPremium);
+  try {
+    const member = await getMemberFromSession();
+    return Boolean(member?.isPremium);
+  } catch {
+    return false;
+  }
 }
 
 export { COOKIE_NAME as MEMBER_COOKIE_NAME, MAX_AGE_SECONDS as MEMBER_SESSION_MAX_AGE };

@@ -6,20 +6,19 @@ import { MemberNavActions } from "@/components/member/MemberNavActions";
 import { getMemberFromSession } from "@/lib/member-auth";
 
 export async function Header() {
-  const member = await getMemberFromSession();
-  const authenticated = Boolean(member);
-  const isPremium = Boolean(member?.isPremium);
+  let authenticated = false;
+  let isPremium = false;
+  try {
+    const member = await getMemberFromSession();
+    authenticated = Boolean(member);
+    isPremium = Boolean(member?.isPremium);
+  } catch (err) {
+    console.error("Header member session lookup failed", err);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/5 bg-[var(--surface)]/90 backdrop-blur-md">
-      <MobileNav
-        authSlot={
-          <MemberNavActions
-            authenticated={authenticated}
-            isPremium={isPremium}
-          />
-        }
-      >
+      <MobileNav authenticated={authenticated} isPremium={isPremium}>
         <Link href="/" className="flex items-center gap-3">
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-black/10 sm:h-11 sm:w-11">
             <Image
