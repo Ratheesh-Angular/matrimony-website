@@ -1,12 +1,5 @@
 import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "business_site";
-
-if (!MONGODB_URI) {
-  // Soft warning so builds without env still succeed; runtime will throw on connect
-  console.warn("MONGODB_URI is not set. Database features will fail until configured.");
-}
+import { runtimeEnv } from "@/lib/runtime-env";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -26,6 +19,9 @@ const cached: MongooseCache = global.mongooseCache ?? {
 global.mongooseCache = cached;
 
 export async function connectDB(): Promise<typeof mongoose> {
+  const MONGODB_URI = runtimeEnv("MONGODB_URI");
+  const MONGODB_DB_NAME = runtimeEnv("MONGODB_DB_NAME") || "business_site";
+
   if (!MONGODB_URI) {
     throw new Error("Please define MONGODB_URI in your environment");
   }
@@ -46,5 +42,5 @@ export async function connectDB(): Promise<typeof mongoose> {
 }
 
 export function getDbName() {
-  return MONGODB_DB_NAME;
+  return runtimeEnv("MONGODB_DB_NAME") || "business_site";
 }

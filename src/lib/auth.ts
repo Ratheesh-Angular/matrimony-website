@@ -1,11 +1,16 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
+import { runtimeEnv } from "@/lib/runtime-env";
 
 const COOKIE_NAME = "admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function getSecret() {
-  return process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD || "dev-secret-change-me";
+  return (
+    runtimeEnv("ADMIN_SESSION_SECRET") ||
+    runtimeEnv("ADMIN_PASSWORD") ||
+    "dev-secret-change-me"
+  );
 }
 
 function sign(value: string) {
@@ -80,14 +85,14 @@ export function getClearAdminCookieOptions() {
  * otherwise uses PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD.
  */
 export function checkAdminCredentials(username: string, password: string) {
-  const adminUser = process.env.ADMIN_USERNAME;
-  const adminPass = process.env.ADMIN_PASSWORD;
+  const adminUser = runtimeEnv("ADMIN_USERNAME");
+  const adminPass = runtimeEnv("ADMIN_PASSWORD");
   if (adminUser && adminPass) {
     return safeEqualStrings(username, adminUser) && safeEqualStrings(password, adminPass);
   }
 
-  const expectedUser = process.env.PROFILE_GATE_USERNAME;
-  const expectedPass = process.env.PROFILE_GATE_PASSWORD;
+  const expectedUser = runtimeEnv("PROFILE_GATE_USERNAME");
+  const expectedPass = runtimeEnv("PROFILE_GATE_PASSWORD");
   if (!expectedUser || !expectedPass) {
     throw new Error(
       "Admin credentials are not configured. Set PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD (or ADMIN_USERNAME / ADMIN_PASSWORD).",
@@ -98,7 +103,7 @@ export function checkAdminCredentials(username: string, password: string) {
 
 /** @deprecated Use checkAdminCredentials — kept for any password-only call sites */
 export function checkAdminPassword(password: string) {
-  const expected = process.env.ADMIN_PASSWORD || process.env.PROFILE_GATE_PASSWORD;
+  const expected = runtimeEnv("ADMIN_PASSWORD") || runtimeEnv("PROFILE_GATE_PASSWORD");
   if (!expected) {
     throw new Error("ADMIN_PASSWORD is not configured");
   }

@@ -1,13 +1,14 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
+import { runtimeEnv } from "@/lib/runtime-env";
 
 const COOKIE_NAME = "profile_gate_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function getSecret() {
   return (
-    process.env.PROFILE_GATE_SESSION_SECRET ||
-    process.env.PROFILE_GATE_PASSWORD ||
+    runtimeEnv("PROFILE_GATE_SESSION_SECRET") ||
+    runtimeEnv("PROFILE_GATE_PASSWORD") ||
     "profile-gate-dev-secret-change-me"
   );
 }
@@ -76,8 +77,8 @@ export function getClearProfileGateCookieOptions() {
 }
 
 export function checkProfileGateCredentials(username: string, password: string) {
-  const expectedUser = process.env.PROFILE_GATE_USERNAME;
-  const expectedPass = process.env.PROFILE_GATE_PASSWORD;
+  const expectedUser = runtimeEnv("PROFILE_GATE_USERNAME");
+  const expectedPass = runtimeEnv("PROFILE_GATE_PASSWORD");
   if (!expectedUser || !expectedPass) {
     throw new Error("PROFILE_GATE_USERNAME / PROFILE_GATE_PASSWORD are not configured");
   }

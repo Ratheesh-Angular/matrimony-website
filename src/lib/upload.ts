@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { runtimeEnv } from "@/lib/runtime-env";
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -74,18 +75,18 @@ type R2Config = {
 };
 
 function getR2Config(): R2Config {
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-  const bucket = process.env.R2_BUCKET_NAME;
-  const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
+  const accountId = runtimeEnv("R2_ACCOUNT_ID");
+  const accessKeyId = runtimeEnv("R2_ACCESS_KEY_ID");
+  const secretAccessKey = runtimeEnv("R2_SECRET_ACCESS_KEY");
+  const bucket = runtimeEnv("R2_BUCKET_NAME");
+  const publicBaseUrl = runtimeEnv("R2_PUBLIC_BASE_URL")?.replace(/\/$/, "");
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBaseUrl) {
     throw new Error(
       "R2 is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, and R2_PUBLIC_BASE_URL.",
     );
   }
   const endpoint =
-    process.env.R2_ENDPOINT?.replace(/\/$/, "") ||
+    runtimeEnv("R2_ENDPOINT")?.replace(/\/$/, "") ||
     `https://${accountId}.r2.cloudflarestorage.com`;
   return { accessKeyId, secretAccessKey, bucket, publicBaseUrl, endpoint };
 }
