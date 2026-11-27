@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { getNameInitial } from "@/lib/name-initial";
-import { isMemberPremium } from "@/lib/member-auth";
+import { getMemberFromSession } from "@/lib/member-auth";
 import { getApprovedProfiles } from "@/lib/profiles";
 import { siteConfig } from "@/site.config";
 
 export async function ApprovedProfilesSection() {
-  const premium = await isMemberPremium();
+  const member = await getMemberFromSession();
+  const premium = Boolean(member?.isPremium);
 
   if (!premium) {
     const amountInr = siteConfig.premium?.amountInr ?? 260;
+    const isPendingReview = member?.paymentStatus === "pending_review";
     return (
       <section
         id="approved-profiles"
@@ -24,27 +26,50 @@ export async function ApprovedProfilesSection() {
             </p>
           </header>
 
-          <div className="mx-auto max-w-xl rounded-2xl border border-[#0056b3]/15 bg-white/90 px-6 py-12 text-center shadow-sm">
-            <p className="font-tamil text-lg font-semibold text-[#0056b3]">
-              வரன்களைப் பார்க்க பிரீமியம் உறுப்பினர் ஆகுங்கள்
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
-              Profile photos and details are available after a one-time payment
-              of ₹{amountInr} for lifetime premium access.
-            </p>
-            <Link
-              href="/premium"
-              className="mt-6 inline-flex items-center justify-center rounded-lg bg-[#d93025] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#b8251c]"
-            >
-              Unlock for ₹{amountInr}
-            </Link>
-            <p className="mt-4 text-sm text-slate-500">
-              Already a member?{" "}
-              <Link href="/login" className="font-semibold text-[#0056b3]">
-                Login
+          {isPendingReview ? (
+            <div className="mx-auto max-w-xl rounded-2xl border border-amber-200 bg-white/95 px-6 py-10 text-center shadow-sm">
+              <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                Payment Under Review
+              </span>
+              <p className="mt-3 font-tamil text-lg font-semibold text-[#0056b3]">
+                உங்கள் கட்டணம் சரிபார்ப்பில் உள்ளது
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Our admin will review your payment and your account will be
+                enabled within 30 mins – 1 hour, then you can see profiles.
+              </p>
+              <Link
+                href="/premium"
+                className="mt-6 inline-flex items-center justify-center rounded-lg bg-[#0056b3] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#004494]"
+              >
+                View Payment Status
               </Link>
-            </p>
-          </div>
+            </div>
+          ) : (
+            <div className="mx-auto max-w-xl rounded-2xl border border-[#0056b3]/15 bg-white/90 px-6 py-12 text-center shadow-sm">
+              <p className="font-tamil text-lg font-semibold text-[#0056b3]">
+                வரன்களைப் பார்க்க பிரீமியம் உறுப்பினர் ஆகுங்கள்
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                Profile photos and details are available after a one-time payment
+                of ₹{amountInr} for lifetime premium access.
+              </p>
+              <Link
+                href="/premium"
+                className="mt-6 inline-flex items-center justify-center rounded-lg bg-[#d93025] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#b8251c]"
+              >
+                {member ? `Complete Payment (₹${amountInr})` : `Unlock for ₹${amountInr}`}
+              </Link>
+              {!member ? (
+                <p className="mt-4 text-sm text-slate-500">
+                  Already a member?{" "}
+                  <Link href="/login" className="font-semibold text-[#0056b3]">
+                    Login
+                  </Link>
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
       </section>
     );

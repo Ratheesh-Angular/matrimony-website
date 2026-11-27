@@ -1,26 +1,49 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+import { Member } from "@/models/Member";
 
 export const dynamic = "force-dynamic";
 
-const actions = [
-  {
-    href: "/profile-details",
-    title: "Manage Profiles",
-    description: "View, approve, reject, or delete biodata submissions.",
-    accent: "bg-[var(--primary)]",
-  },
-  {
-    href: "/admin/gallery",
-    title: "Manage Gallery",
-    description: "Upload photos and videos shown on the public gallery page.",
-    accent: "bg-[var(--accent)]",
-  },
-];
-
 export default async function AdminDashboard() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
+
+  let pendingMembers = 0;
+  try {
+    await connectDB();
+    pendingMembers = await Member.countDocuments({
+      isPremium: false,
+      paymentStatus: "pending_review",
+    });
+  } catch {
+    pendingMembers = 0;
+  }
+
+  const actions = [
+    {
+      href: "/admin/members",
+      title: "Members & Payments",
+      description:
+        "Review ₹260 UPI payments and approve or revoke member accounts.",
+      accent: "bg-emerald-600",
+      badge: pendingMembers > 0 ? `${pendingMembers} pending` : null,
+    },
+    {
+      href: "/profile-details",
+      title: "Manage Profiles",
+      description: "View, approve, reject, or delete biodata submissions.",
+      accent: "bg-[var(--primary)]",
+      badge: null,
+    },
+    {
+      href: "/admin/gallery",
+      title: "Manage Gallery",
+      description: "Upload photos and videos shown on the public gallery page.",
+      accent: "bg-[var(--accent)]",
+      badge: null,
+    },
+  ];
 
   return (
     <div>
@@ -38,8 +61,15 @@ export default async function AdminDashboard() {
           >
             <span className={`w-2 shrink-0 ${action.accent}`} aria-hidden />
             <span className="flex flex-1 flex-col justify-center px-5 py-5">
-              <span className="text-lg font-semibold text-slate-900 group-hover:text-[var(--primary)]">
-                {action.title}
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-lg font-semibold text-slate-900 group-hover:text-[var(--primary)]">
+                  {action.title}
+                </span>
+                {action.badge ? (
+                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                    {action.badge}
+                  </span>
+                ) : null}
               </span>
               <span className="mt-1 text-sm leading-snug text-slate-500">{action.description}</span>
               <span className="mt-3 text-sm font-medium text-[var(--accent)]">Open →</span>

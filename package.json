@@ -11,6 +11,8 @@
     "grant-premium": "tsx scripts/grant-premium.ts",
     "migrate:photos": "tsx scripts/migrate-profile-photos-to-r2.ts",
     "migrate:photos:apply": "tsx scripts/migrate-profile-photos-to-r2.ts --apply",
+    "migrate:gallery": "tsx scripts/migrate-gallery-to-r2.ts",
+    "migrate:gallery:apply": "tsx scripts/migrate-gallery-to-r2.ts --apply",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --keep-vars",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",

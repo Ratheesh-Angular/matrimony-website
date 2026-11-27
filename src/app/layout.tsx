@@ -31,7 +31,11 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: siteConfig.faviconPath,
+    icon: [
+      { url: siteConfig.faviconPath, sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/brand/icon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: siteConfig.businessName,

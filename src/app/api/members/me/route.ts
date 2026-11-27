@@ -10,8 +10,14 @@ export async function GET() {
 
     return NextResponse.json({
       authenticated: true,
+      name: member.name || "",
       phone: member.phone,
       isPremium: Boolean(member.isPremium),
+      paymentStatus: member.isPremium
+        ? "approved"
+        : member.paymentStatus || "unpaid",
+      paymentSubmittedAt: member.paymentSubmittedAt ?? null,
+      paymentReference: member.paymentReference || "",
     });
   } catch (err) {
     console.error(err);

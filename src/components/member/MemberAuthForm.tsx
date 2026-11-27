@@ -40,6 +40,7 @@ export function MemberAuthForm({
     setLoading(true);
     setError("");
     const form = new FormData(e.currentTarget);
+    const name = String(form.get("name") || "").trim();
     const phone = String(form.get("phone") || "").trim();
     const password = String(form.get("password") || "");
     const confirmPassword = String(form.get("confirmPassword") || "");
@@ -53,7 +54,7 @@ export function MemberAuthForm({
           body: JSON.stringify(
             mode === "login"
               ? { phone, password }
-              : { phone, password, confirmPassword },
+              : { name, phone, password, confirmPassword },
           ),
         },
       );
@@ -84,9 +85,26 @@ export function MemberAuthForm({
         <p className="mt-1 text-sm text-slate-500">
           {mode === "login"
             ? "Login with your mobile number and password"
-            : "Create an account with mobile number and password"}
+            : "Create an account with your name, mobile number, and password"}
         </p>
       </div>
+
+      {mode === "register" ? (
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium">Full name</span>
+          <input
+            type="text"
+            name="name"
+            required
+            minLength={2}
+            maxLength={100}
+            autoComplete="name"
+            placeholder="Enter your full name"
+            className="w-full rounded-md border border-slate-200 px-3 py-2.5"
+            autoFocus
+          />
+        </label>
+      ) : null}
 
       <label className="block text-sm">
         <span className="mb-1 block font-medium">Mobile number</span>
@@ -107,7 +125,7 @@ export function MemberAuthForm({
             pattern="[6-9][0-9]{9}"
             title="Enter a 10-digit Indian mobile number"
             className="w-full rounded-md border border-slate-200 py-2.5 pl-[5.25rem] pr-3"
-            autoFocus
+            autoFocus={mode === "login"}
             onInput={(e) => {
               e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "").slice(0, 10);
             }}

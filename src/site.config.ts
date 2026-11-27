@@ -12,7 +12,7 @@ export const siteConfig = {
 
   /** Logo path under /public */
   logoPath: "/brand/logo.png",
-  faviconPath: "/brand/logo.png",
+  faviconPath: "/brand/favicon.ico",
 
   /** Theme — applied as CSS variables */
   colors: {
